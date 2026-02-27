@@ -1,0 +1,59 @@
+/* =============================================
+   MarketTicker — Theme-independent styles
+   Imported directly in MarketTicker.tsx so
+   these rules are ALWAYS included in the bundle,
+   regardless of Tailwind v4 content scanning.
+   ============================================= */
+
+.ticker-bar {
+    width: 100%;
+    overflow: hidden;
+    background-color: #000000 !important;
+    color: #ffffff;
+}
+
+.ticker-track {
+    display: flex;
+    align-items: center;
+    height: 40px;
+}
+
+.ticker-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 24px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.ticker-item-symbol {
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: 0.05em;
+}
+
+.ticker-item-price {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.ticker-change-positive {
+    font-weight: 600;
+    color: #34d399 !important;
+}
+
+.ticker-change-negative {
+    font-weight: 600;
+    color: #ef4444 !important;
+}
+
+.ticker-change-neutral {
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.ticker-copy {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
