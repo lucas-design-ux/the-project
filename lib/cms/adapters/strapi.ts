@@ -103,6 +103,11 @@ async function strapiFetch<T>(
         headers: {
             Authorization: `Bearer ${STRAPI_TOKEN}`,
             "Content-Type": "application/json",
+            // Optional: Cloudflare Zero Trust access headers
+            ...(process.env.CF_ACCESS_CLIENT_ID && { "CF-Access-Client-Id": process.env.CF_ACCESS_CLIENT_ID }),
+            ...(process.env.CF_ACCESS_CLIENT_SECRET && { "CF-Access-Client-Secret": process.env.CF_ACCESS_CLIENT_SECRET }),
+            // Optional: Custom header for WAF bypass rule
+            ...(process.env.CF_BYPASS_TOKEN && { "x-vercel-bypass": process.env.CF_BYPASS_TOKEN }),
         },
         cache: process.env.NODE_ENV === "development" ? "no-store" : undefined,
         next: process.env.NODE_ENV === "development" ? undefined : { revalidate: 3600 },
