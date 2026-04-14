@@ -1,18 +1,11 @@
 import type { NextConfig } from "next";
 
-const withBundleAnalyzer = require("@next/bundle-analyzer")({
-  enabled: process.env.ANALYZE === "true",
-});
+const isDev = process.env.NODE_ENV === "development";
 
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
-      {
-        protocol: "http",
-        hostname: "localhost",
-        port: "1337",
-        pathname: "/uploads/**",
-      },
+      // Production: Strapi API via Cloudflare proxy
       {
         protocol: "https",
         hostname: "api.wealthlogik.com",
@@ -33,9 +26,20 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      // Dev-only: local Strapi
+      ...(isDev
+        ? [
+            {
+              protocol: "http" as const,
+              hostname: "localhost",
+              port: "1337",
+              pathname: "/uploads/**",
+            },
+          ]
+        : []),
     ],
     minimumCacheTTL: 31536000, // 1 year for images
-    dangerouslyAllowLocalIP: true, // Allow Strapi images from localhost in dev
+    ...(isDev ? { dangerouslyAllowLocalIP: true } : {}),
   },
 
   async headers() {
@@ -50,10 +54,9 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      // Note: Removed the immutable cache for /_next/static/ to prevent dev-mode lock-in
     ];
   },
 };
 
-export default withBundleAnalyzer(nextConfig);
+export default nextConfig;
 
