@@ -1,10 +1,48 @@
-// app/page.tsx (Versão de Teste de Bypass)
+import { Suspense } from "react";
+import HeroSectionAsync from "@/components/organisms/HeroSection/HeroSectionAsync";
+import HeroSectionSkeleton from "@/components/organisms/HeroSection/HeroSectionSkeleton";
+import FeaturedArticlesGridAsync from "@/components/organisms/FeaturedArticlesGrid/FeaturedArticlesGridAsync";
+import FeaturedArticlesGridSkeleton from "@/components/organisms/FeaturedArticlesGrid/FeaturedArticlesGridSkeleton";
+import CategorySectionsGridAsync from "@/components/organisms/CategorySection/CategorySectionsGridAsync";
+import CategorySectionsGridSkeleton from "@/components/organisms/CategorySection/CategorySectionsGridSkeleton";
+import LatestArticlesFeedAsync from "@/components/organisms/LatestArticlesFeed/LatestArticlesFeedAsync";
+import LatestArticlesFeedSkeleton from "@/components/organisms/LatestArticlesFeed/LatestArticlesFeedSkeleton";
+import { Section } from "@/components/organisms/Section/Section";
 
-export default function HomePage() {
+export const revalidate = 3600; // Revalidate every hour
+
+export default function Home() {
   return (
-    <main style={{ padding: '40px', fontFamily: 'sans-serif', textAlign: 'center' }}>
-      <h1>Hello World - A Vitrine Ligou!</h1>
-      <p>O bypass funcionou. O problema está na camada de busca de dados (CMS Adapter).</p>
+    <main className="flex flex-col">
+      <Suspense fallback={<HeroSectionSkeleton />}>
+        <HeroSectionAsync />
+      </Suspense>
+
+      <Section
+        title="Editor's Picks"
+        subtitle="Curated insights and analysis"
+        className="border-t border-border"
+      >
+        <Suspense fallback={<FeaturedArticlesGridSkeleton />}>
+          <FeaturedArticlesGridAsync />
+        </Suspense>
+      </Section>
+
+      <Section className="border-t border-border pt-16 sm:pt-20">
+        <Suspense fallback={<CategorySectionsGridSkeleton />}>
+          <CategorySectionsGridAsync />
+        </Suspense>
+      </Section>
+
+      <Section
+        title="Latest Updates"
+        subtitle="Fresh perspectives on personal finance"
+        className="border-t border-border"
+      >
+        <Suspense fallback={<LatestArticlesFeedSkeleton />}>
+          <LatestArticlesFeedAsync />
+        </Suspense>
+      </Section>
     </main>
   );
 }
