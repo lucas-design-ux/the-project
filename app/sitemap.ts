@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { cms } from '@/lib/cms';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.wealthlogik.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://wealthlogik.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // 1. Static Routes
@@ -53,7 +53,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
 
     const articleRoutes: MetadataRoute.Sitemap = allArticles.map((article) => ({
-        url: `${SITE_URL}/${article.slug}`,
+        url: `${SITE_URL}/article/${article.slug}`,
         lastModified: new Date(article.publishedAt || new Date()),
         changeFrequency: 'monthly',
         priority: 0.7,
