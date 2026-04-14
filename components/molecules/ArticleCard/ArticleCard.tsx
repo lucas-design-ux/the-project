@@ -12,9 +12,9 @@ import { cn } from "@/lib/utils";
 const articleCardVariants = cva("group flex overflow-hidden transition-all duration-300 hover:border-foreground/20", {
     variants: {
         variant: {
-            default: "flex-col",
-            featured: "flex-col lg:flex-row lg:items-center gap-8 lg:gap-12",
-            compact: "flex-col",
+            default: "flex-row sm:flex-col",
+            featured: "flex-col lg:flex-row lg:items-center gap-4 sm:gap-8 lg:gap-12",
+            compact: "flex-row sm:flex-col",
         },
     },
     defaultVariants: {
@@ -22,12 +22,12 @@ const articleCardVariants = cva("group flex overflow-hidden transition-all durat
     },
 });
 
-const imageContainerVariants = cva("relative overflow-hidden bg-muted border-b border-border/50", {
+const imageContainerVariants = cva("relative overflow-hidden bg-muted", {
     variants: {
         variant: {
-            default: "aspect-[4/3] w-full border-b-2",
-            featured: "aspect-[4/3] w-full lg:w-1/2 lg:aspect-[4/3] border-b-2 lg:border-b-0 lg:border-r-2",
-            compact: "aspect-[3/2] w-full border-b",
+            default: "w-28 h-24 shrink-0 sm:w-full sm:h-auto sm:aspect-[4/3] border-r sm:border-r-0 sm:border-b-2 border-border/50",
+            featured: "aspect-[16/9] sm:aspect-[4/3] w-full lg:w-1/2 lg:aspect-[4/3] border-b-2 lg:border-b-0 lg:border-r-2",
+            compact: "w-24 h-20 shrink-0 sm:w-full sm:h-auto sm:aspect-[3/2] border-r sm:border-r-0 sm:border-b border-border/50",
         },
     },
     defaultVariants: {
@@ -38,9 +38,9 @@ const imageContainerVariants = cva("relative overflow-hidden bg-muted border-b b
 const contentVariants = cva("flex flex-col", {
     variants: {
         variant: {
-            default: "p-6 space-y-4",
-            featured: "p-6 lg:p-0 lg:w-1/2 space-y-6",
-            compact: "p-4 space-y-2",
+            default: "p-3 sm:p-6 space-y-1 sm:space-y-4 justify-center sm:justify-start",
+            featured: "p-4 sm:p-6 lg:p-0 lg:w-1/2 space-y-3 sm:space-y-6",
+            compact: "p-3 sm:p-4 space-y-1 sm:space-y-2 justify-center sm:justify-start",
         },
     },
     defaultVariants: {
@@ -133,13 +133,14 @@ export default function ArticleCard({ article, className, variant = "default" }:
                         <h3
                             className={cn(
                                 "font-serif font-normal leading-tight tracking-tight text-foreground group-hover:opacity-70 transition-opacity",
+                                "line-clamp-2 sm:line-clamp-none"
                             )}
                             style={{
                                 fontSize: variant === 'featured'
-                                    ? 'clamp(2rem, 1.5vw + 1.5rem, 2.75rem)'
+                                    ? 'clamp(1.5rem, 1.5vw + 1.25rem, 2.75rem)'
                                     : variant === 'compact'
-                                        ? '1.25rem'
-                                        : 'clamp(1.5rem, 1.25vw + 1.25rem, 2.25rem)',
+                                        ? 'clamp(0.9rem, 1vw + 0.6rem, 1.25rem)'
+                                        : 'clamp(0.95rem, 1.25vw + 0.7rem, 2.25rem)',
                             }}
                             title={article.title}
                         >
@@ -148,14 +149,14 @@ export default function ArticleCard({ article, className, variant = "default" }:
                     </Link>
                 </div>
 
-                {variant !== 'compact' && (
-                    <p className="line-clamp-3 text-base leading-relaxed text-muted-foreground">
+                {variant === 'featured' && (
+                    <p className="hidden sm:block line-clamp-3 text-base leading-relaxed text-muted-foreground">
                         {article.excerpt}
                     </p>
                 )}
 
                 <div className={cn(
-                    "flex flex-wrap items-center gap-3 text-sm text-muted-foreground",
+                    "hidden sm:flex flex-wrap items-center gap-3 text-sm text-muted-foreground",
                     variant === 'compact' ? "pt-2" : "pt-4 border-t border-border/50 mt-auto"
                 )}>
                     <span className="font-semibold text-foreground">{article.author.name}</span>

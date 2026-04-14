@@ -1,4 +1,4 @@
-import { cms } from "@/lib/cms/adapters/mock";
+import { cms } from "@/lib/cms";
 import LatestArticlesFeed from "@/components/organisms/LatestArticlesFeed/LatestArticlesFeed";
 
 export default async function LatestArticlesFeedAsync() {

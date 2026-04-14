@@ -97,9 +97,9 @@ export default function ToolsPage() {
                     <p className="cta-item text-xs uppercase tracking-[0.3em] font-bold text-muted-foreground mb-6">
                         Understanding is Power
                     </p>
-                    <h3 className="cta-item font-serif text-3xl md:text-4xl font-normal mb-6 leading-tight">
+                    <h2 className="cta-item font-serif text-3xl md:text-4xl font-normal mb-6 leading-tight">
                         Learn as You Calculate
-                    </h3>
+                    </h2>
                     <p className="cta-item text-lg text-muted-foreground leading-relaxed">
                         Each tool includes contextual insights and links to in-depth articles.
                         Because the best financial decisions are informed decisions.

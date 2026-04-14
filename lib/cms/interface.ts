@@ -26,6 +26,37 @@ export interface Category {
     description?: string;
 }
 
+export interface FAQItem {
+    question: string;
+    answer: string;
+}
+
+export interface SpokeMapping {
+    h2_referenced: string;
+    spoke_cms_id: string;
+    suggested_topic: string;
+    inserted_url: string;
+}
+
+export interface SpokeMeta {
+    parent_pillar_slug: string;
+    parent_pillar_title: string;
+    parent_pillar_url?: string;
+    spoke_cms_id?: string;
+    original_h2?: string;
+    editorial_angle?: string;
+    target_reader?: string;
+    spoke_url?: string;
+}
+
+export type ToolFormat = 'inline' | 'cta';
+
+export interface InjectedTool {
+    position: string;
+    component: string;
+    format: ToolFormat;
+}
+
 export interface Article {
     id: string;
     title: string;
@@ -41,6 +72,14 @@ export interface Article {
     articleType: ArticleType;
     keyTakeaways: string[];
     relatedTool?: RelatedTool;
+    // Pipeline-enriched fields (optional for backward compatibility)
+    metaDescription?: string;
+    tags?: string[];
+    faqSection?: FAQItem[];
+    schemaJsonLd?: Record<string, unknown>[];
+    cmsSpokeMapping?: SpokeMapping[];
+    tools?: InjectedTool[];
+    spokeMeta?: SpokeMeta;
 }
 
 export interface CMSAdapter {
@@ -54,4 +93,6 @@ export interface CMSAdapter {
     getAllCategories(): Promise<Category[]>;
     getRelatedArticles(currentArticleId: string): Promise<Article[]>;
     searchArticles(query: string): Promise<Article[]>;
+    getPillarArticles(): Promise<Article[]>;
+    getSiblingSpokes(parentPillarSlug: string, currentArticleSlug: string, limit: number): Promise<Article[]>;
 }

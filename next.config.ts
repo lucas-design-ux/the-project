@@ -8,6 +8,18 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
+        protocol: "http",
+        hostname: "localhost",
+        port: "1337",
+        pathname: "/uploads/**",
+      },
+      {
+        protocol: "https",
+        hostname: "api.wealthlogik.com",
+        port: "",
+        pathname: "/uploads/**",
+      },
+      {
         protocol: "https",
         hostname: "picsum.photos",
       },
@@ -23,6 +35,7 @@ const nextConfig: NextConfig = {
       },
     ],
     minimumCacheTTL: 31536000, // 1 year for images
+    dangerouslyAllowLocalIP: true, // Allow Strapi images from localhost in dev
   },
 
   async headers() {

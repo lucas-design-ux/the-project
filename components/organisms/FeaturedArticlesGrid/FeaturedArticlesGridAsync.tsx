@@ -1,8 +1,8 @@
-import { cms } from "@/lib/cms/adapters/mock";
+import { cms } from "@/lib/cms";
 import FeaturedArticlesGrid from "@/components/organisms/FeaturedArticlesGrid/FeaturedArticlesGrid";
 
 export default async function FeaturedArticlesGridAsync() {
-    const curatedArticles = await cms.getCuratedArticles();
+    const pillarArticles = await cms.getPillarArticles();
 
-    return <FeaturedArticlesGrid articles={curatedArticles} />;
+    return <FeaturedArticlesGrid articles={pillarArticles} />;
 }

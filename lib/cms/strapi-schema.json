@@ -1,0 +1,55 @@
+{
+  "kind": "collectionType",
+  "collectionName": "articles",
+  "info": {
+    "singularName": "article",
+    "pluralName": "articles",
+    "displayName": "Article",
+    "description": "Pipeline-generated pillar articles for the WealthLogik pSEO content farm."
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
+    },
+    "meta_description": {
+      "type": "text"
+    },
+    "category": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "json"
+    },
+    "publish_date": {
+      "type": "datetime"
+    },
+    "featured_image_url": {
+      "type": "string"
+    },
+    "content_html": {
+      "type": "richtext"
+    },
+    "key_takeaways": {
+      "type": "json"
+    },
+    "faq_section": {
+      "type": "json"
+    },
+    "schema_json_ld": {
+      "type": "json"
+    },
+    "cms_spoke_mappings": {
+      "type": "json"
+    }
+  }
+}

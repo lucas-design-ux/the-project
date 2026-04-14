@@ -5,8 +5,6 @@ import FeaturedArticlesGridAsync from "@/components/organisms/FeaturedArticlesGr
 import FeaturedArticlesGridSkeleton from "@/components/organisms/FeaturedArticlesGrid/FeaturedArticlesGridSkeleton";
 import CategorySectionsGridAsync from "@/components/organisms/CategorySection/CategorySectionsGridAsync";
 import CategorySectionsGridSkeleton from "@/components/organisms/CategorySection/CategorySectionsGridSkeleton";
-import SideHustlesSectionAsync from "@/components/organisms/CategorySection/SideHustlesSectionAsync";
-import SideHustlesSectionSkeleton from "@/components/organisms/CategorySection/SideHustlesSectionSkeleton";
 import LatestArticlesFeedAsync from "@/components/organisms/LatestArticlesFeed/LatestArticlesFeedAsync";
 import LatestArticlesFeedSkeleton from "@/components/organisms/LatestArticlesFeed/LatestArticlesFeedSkeleton";
 import { Section } from "@/components/organisms/Section/Section";
@@ -33,12 +31,6 @@ export default function Home() {
       <Section className="border-t border-border pt-16 sm:pt-20">
         <Suspense fallback={<CategorySectionsGridSkeleton />}>
           <CategorySectionsGridAsync />
-        </Suspense>
-      </Section>
-
-      <Section className="border-t border-border bg-muted/20">
-        <Suspense fallback={<SideHustlesSectionSkeleton />}>
-          <SideHustlesSectionAsync />
         </Suspense>
       </Section>
 

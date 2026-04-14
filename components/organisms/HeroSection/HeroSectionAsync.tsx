@@ -1,4 +1,4 @@
-import { cms } from "@/lib/cms/adapters/mock";
+import { cms } from "@/lib/cms";
 import HeroSection from "@/components/organisms/HeroSection/HeroSection";
 
 export default async function HeroSectionAsync() {

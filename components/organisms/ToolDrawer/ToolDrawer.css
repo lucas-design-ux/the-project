@@ -1,0 +1,217 @@
+/* =========================================================
+   TOOL DISCOVERY DRAWER
+   Desktop: slides from the right edge
+   Mobile:  bottom sheet at 40vh
+   ========================================================= */
+
+/* Overlay — very subtle, no dark blocking background */
+.tool-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+    pointer-events: none;
+    visibility: hidden;
+    transition: visibility 0.3s;
+}
+
+.tool-drawer-overlay--open {
+    pointer-events: auto;
+    visibility: visible;
+    background: rgba(0, 0, 0, 0.08);
+}
+
+/* Drawer panel */
+.tool-drawer {
+    position: fixed;
+    z-index: 901;
+    background: hsl(var(--background));
+    border-left: 1px solid hsl(var(--border));
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.08);
+
+    /* Desktop: right sidebar */
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 380px;
+    max-width: 90vw;
+    transform: translateX(100%);
+}
+
+.tool-drawer--open {
+    transform: translateX(0);
+}
+
+/* Header */
+.tool-drawer__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 1px solid hsl(var(--border));
+}
+
+.tool-drawer__label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: hsl(var(--muted-foreground));
+    margin: 0 0 0.25rem;
+}
+
+.tool-drawer__title {
+    font-family: var(--font-dm-serif), Georgia, serif;
+    font-size: 1.375rem;
+    font-weight: 400;
+    margin: 0;
+    color: hsl(var(--foreground));
+}
+
+.tool-drawer__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid hsl(var(--border));
+    background: transparent;
+    color: hsl(var(--foreground));
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+}
+
+.tool-drawer__close:hover {
+    background: hsl(var(--muted));
+    border-color: hsl(var(--foreground));
+}
+
+/* Tool list */
+.tool-drawer__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.tool-drawer__item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid hsl(var(--border));
+    text-decoration: none;
+    color: hsl(var(--foreground));
+    transition: background 0.15s;
+}
+
+.tool-drawer__item:hover {
+    background: hsl(var(--muted) / 0.5);
+}
+
+.tool-drawer__item-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.tool-drawer__item-name {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    margin-bottom: 0.25rem;
+}
+
+.tool-drawer__item-desc {
+    display: block;
+    font-size: 0.8125rem;
+    color: hsl(var(--muted-foreground));
+    line-height: 1.4;
+}
+
+.tool-drawer__item-arrow {
+    flex-shrink: 0;
+    color: hsl(var(--muted-foreground));
+    transition: transform 0.15s, color 0.15s;
+}
+
+.tool-drawer__item:hover .tool-drawer__item-arrow {
+    transform: translateX(3px);
+    color: hsl(var(--foreground));
+}
+
+/* Footer CTA */
+.tool-drawer__footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid hsl(var(--border));
+}
+
+.tool-drawer__cta {
+    display: block;
+    text-align: center;
+    padding: 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: hsl(var(--primary-foreground));
+    background: hsl(var(--primary));
+    text-decoration: none;
+    transition: opacity 0.15s;
+}
+
+.tool-drawer__cta:hover {
+    opacity: 0.9;
+}
+
+/* -----------------------------------------------------------
+   MOBILE: Bottom sheet
+   ----------------------------------------------------------- */
+@media (max-width: 768px) {
+    .tool-drawer {
+        top: auto;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        max-width: 100%;
+        height: 40vh;
+        min-height: 280px;
+        border-left: none;
+        border-top: 1px solid hsl(var(--border));
+        border-radius: 1rem 1rem 0 0;
+        transform: translateY(100%);
+        box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .tool-drawer--open {
+        transform: translateY(0);
+    }
+
+    .tool-drawer__header {
+        padding: 1rem 1.25rem 0.75rem;
+    }
+
+    .tool-drawer__title {
+        font-size: 1.125rem;
+    }
+
+    .tool-drawer__item {
+        padding: 1rem 1.25rem;
+    }
+
+    .tool-drawer__footer {
+        padding: 0.75rem 1.25rem;
+    }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .tool-drawer,
+    .tool-drawer-overlay {
+        transition-duration: 0.01ms;
+    }
+}

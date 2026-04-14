@@ -6,13 +6,14 @@ import SearchBar from "@/components/molecules/SearchBar/SearchBar";
 import MobileMenu from "./MobileMenu";
 
 const CATEGORIES = [
-    { id: '1', name: 'Budgeting & Debt', slug: 'budgeting-and-debt' },
-    { id: '2', name: 'Investing 101', slug: 'investing-101' },
-    { id: '3', name: 'Strategies', slug: 'investing-strategies' },
-    { id: '4', name: 'Real Estate', slug: 'real-estate' },
+    { id: '1', name: 'Legal Finance', slug: 'legal-finance' },
+    { id: '2', name: 'Insurance & Protection', slug: 'insurance-and-protection' },
+    { id: '3', name: 'Auto & Transport', slug: 'auto-and-transport' },
+    { id: '4', name: 'Real Estate & Mortgages', slug: 'real-estate-and-mortgages' },
     { id: '5', name: 'Taxes', slug: 'taxes' },
-    { id: '6', name: 'Fintech', slug: 'fintech-and-apps' },
-    { id: '7', name: 'Side Hustles', slug: 'side-hustles' },
+    { id: '6', name: 'Investing & Wealth', slug: 'investing-and-wealth' },
+    { id: '7', name: 'Budgeting & Debt', slug: 'budgeting-and-debt' },
+    { id: '8', name: 'Side Hustles & Fintech', slug: 'side-hustles-and-fintech' },
 ];
 
 const TOOLS = [
@@ -26,7 +27,7 @@ const TOOLS = [
 const NavLink = ({ href, children }: { href: string, children: React.ReactNode }) => (
     <Link
         href={href}
-        className="text-[13px] font-medium uppercase tracking-wide transition-colors hover:text-foreground text-muted-foreground relative after:absolute after:bottom-[-2px] after:left-0 after:h-[2px] after:w-0 after:bg-foreground after:transition-all hover:after:w-full"
+        className="text-[13px] font-medium uppercase tracking-wide transition-colors hover:text-foreground text-muted-foreground relative after:absolute after:bottom-[-2px] after:left-0 after:h-[2px] after:w-0 after:bg-foreground after:transition-all hover:after:w-full inline-flex items-center min-h-[44px]"
     >
         {children}
     </Link>
@@ -39,15 +40,15 @@ export default function Header() {
                 <div className="flex items-center gap-8 lg:gap-12 xl:gap-20 flex-1">
                     <Link href="/" className="flex items-center shrink-0 border-none outline-none">
                         <span className="font-serif text-3xl font-normal tracking-tight text-foreground hover:opacity-70 transition-opacity">
-                            MoneyHub
+                            Wealth Logik
                         </span>
                     </Link>
 
                     {/* Desktop Navigation */}
-                    <nav className="desktop-only desktop-nav">
+                    <nav className="desktop-only desktop-nav" aria-label="Main navigation">
                         {/* Articles Dropdown */}
                         <div className="relative group">
-                            <button className="flex items-center gap-1.5 text-[13px] font-medium uppercase tracking-wide transition-colors hover:text-foreground text-muted-foreground outline-none py-2">
+                            <button className="flex items-center gap-1.5 text-[13px] font-medium uppercase tracking-wide transition-colors hover:text-foreground text-muted-foreground outline-none min-h-[44px]" aria-haspopup="true" aria-expanded="false">
                                 Articles <ChevronDown className="h-4 w-4 opacity-70 transition-transform duration-300 group-hover:-rotate-180" />
                             </button>
 
@@ -61,7 +62,7 @@ export default function Header() {
                                         <Link
                                             key={category.id}
                                             href={`/category/${category.slug}`}
-                                            className="px-5 py-2.5 text-[13.5px] font-medium transition-colors hover:bg-muted/80 hover:text-foreground text-muted-foreground flex items-center"
+                                            className="px-5 py-3 text-[13.5px] font-medium transition-colors hover:bg-muted/80 hover:text-foreground text-muted-foreground flex items-center min-h-[44px]"
                                         >
                                             {category.name}
                                         </Link>
@@ -72,7 +73,7 @@ export default function Header() {
 
                         {/* Tools Dropdown */}
                         <div className="relative group">
-                            <button className="flex items-center gap-1.5 text-[13px] font-medium uppercase tracking-wide transition-colors hover:text-foreground text-muted-foreground outline-none py-2">
+                            <button className="flex items-center gap-1.5 text-[13px] font-medium uppercase tracking-wide transition-colors hover:text-foreground text-muted-foreground outline-none min-h-[44px]" aria-haspopup="true" aria-expanded="false">
                                 Tools <ChevronDown className="h-4 w-4 opacity-70 transition-transform duration-300 group-hover:-rotate-180" />
                             </button>
 
@@ -86,7 +87,7 @@ export default function Header() {
                                         <Link
                                             key={tool.slug}
                                             href={`/tools/${tool.slug}`}
-                                            className="px-5 py-2.5 text-[13.5px] font-medium transition-colors hover:bg-muted/80 hover:text-foreground text-muted-foreground flex items-center"
+                                            className="px-5 py-3 text-[13.5px] font-medium transition-colors hover:bg-muted/80 hover:text-foreground text-muted-foreground flex items-center min-h-[44px]"
                                         >
                                             {tool.name}
                                         </Link>
@@ -95,9 +96,26 @@ export default function Header() {
                             </div>
                         </div>
 
+                        {/* Institution Dropdown */}
+                        <div className="relative group">
+                            <button className="flex items-center gap-1.5 text-[13px] font-medium uppercase tracking-wide transition-colors hover:text-foreground text-muted-foreground outline-none min-h-[44px]" aria-haspopup="true" aria-expanded="false">
+                                Institution <ChevronDown className="h-4 w-4 opacity-70 transition-transform duration-300 group-hover:-rotate-180" />
+                            </button>
+
+                            {/* Dropdown Panel */}
+                            <div className="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 transform translate-y-2 group-hover:translate-y-0">
+                                {/* Hover bridge to prevent losing hover state */}
+                                <div className="absolute -top-3 left-0 right-0 h-4 bg-transparent" />
+
+                                <div className="bg-background border border-border/50 shadow-xl rounded-xl py-2 w-[220px] flex flex-col relative overflow-hidden backdrop-blur-xl supports-backdrop-filter:bg-background/90">
+                                    <Link href="/about" className="px-5 py-3 text-[13.5px] font-medium transition-colors hover:bg-muted/80 hover:text-foreground text-muted-foreground flex items-center min-h-[44px]">About</Link>
+                                    <Link href="/editorial-policy" className="px-5 py-3 text-[13.5px] font-medium transition-colors hover:bg-muted/80 hover:text-foreground text-muted-foreground flex items-center min-h-[44px]">Editorial Policy</Link>
+                                    <Link href="/policy-and-privacy" className="px-5 py-3 text-[13.5px] font-medium transition-colors hover:bg-muted/80 hover:text-foreground text-muted-foreground flex items-center min-h-[44px]">Policy and Privacy</Link>
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Static Links */}
-                        <NavLink href="/policy-and-privacy">Policy and Privacy</NavLink>
-                        <NavLink href="/about">About</NavLink>
                         <NavLink href="/contact">Contact</NavLink>
                     </nav>
                 </div>

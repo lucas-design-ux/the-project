@@ -1,0 +1,61 @@
+/* =========================================================
+   ABOUT PAGE — Step Cards & Disclaimer
+   ========================================================= */
+
+/* Step number counter */
+.about-step-number {
+    font-family: var(--font-dm-serif), Georgia, serif;
+    font-size: clamp(3rem, 2.5rem + 2vw, 4.5rem);
+    line-height: 1;
+    color: hsl(var(--border));
+    transition: color 0.3s ease;
+}
+
+.about-step-card:hover .about-step-number {
+    color: hsl(var(--foreground));
+}
+
+/* Step card layout */
+.about-step-card {
+    position: relative;
+    padding: var(--space-8) var(--space-6);
+    border: 1px solid hsl(var(--border));
+    transition: border-color 0.3s ease, transform 0.3s ease;
+}
+
+.about-step-card:hover {
+    border-color: hsl(var(--foreground));
+    transform: translateY(-4px);
+}
+
+@media (min-width: 640px) {
+    .about-step-card {
+        padding: var(--space-10) var(--space-8);
+    }
+}
+
+/* Disclaimer box */
+.about-disclaimer {
+    border: 1px solid hsl(var(--border));
+    border-top: 3px solid hsl(var(--foreground));
+    padding: var(--space-8) var(--space-6);
+    background: hsl(var(--muted));
+}
+
+@media (min-width: 640px) {
+    .about-disclaimer {
+        padding: var(--space-10) var(--space-8);
+    }
+}
+
+/* Editorial divider */
+.about-divider {
+    width: 64px;
+    height: 2px;
+    background: hsl(var(--foreground));
+}
+
+/* Animate items (used by GSAP) */
+.about-animate-item {
+    opacity: 0;
+}

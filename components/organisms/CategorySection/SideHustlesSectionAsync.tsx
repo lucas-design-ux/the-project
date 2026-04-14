@@ -1,18 +1,18 @@
-import { cms } from "@/lib/cms/adapters/mock";
+import { cms } from "@/lib/cms";
 import ArticleCard from "@/components/molecules/ArticleCard/ArticleCard";
 import ToolSuggestionBanner from "@/components/molecules/ToolSuggestionBanner/ToolSuggestionBanner";
 import Link from "next/link";
 
 export default async function SideHustlesSectionAsync() {
-    const { articles } = await cms.getArticlesByCategory('side-hustles', { page: 1, limit: 4 });
+    const { articles } = await cms.getArticlesByCategory('side-hustles-and-fintech', { page: 1, limit: 4 });
 
     if (!articles || articles.length === 0) return null;
 
     return (
         <section className="flex flex-col">
-            <Link href="/category/side-hustles" className="group mb-8 flex items-center justify-between border-b-[3px] border-foreground pb-2">
+            <Link href="/category/side-hustles-and-fintech" className="group mb-8 flex items-center justify-between border-b-[3px] border-foreground pb-2">
                 <h2 className="font-serif text-xl md:text-2xl lg:text-3xl font-normal group-hover:opacity-70 transition-opacity tracking-tight">
-                    Side Hustles
+                    Side Hustles & Fintech
                 </h2>
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold uppercase tracking-widest text-muted-foreground shrink-0 ml-2">
                     View All →

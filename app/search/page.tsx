@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Metadata } from "next";
-import { cms } from "@/lib/cms/adapters/mock";
+import { cms } from "@/lib/cms";
 import ArticleGrid from "@/components/organisms/ArticleGrid/ArticleGrid";
 import { Container } from "@/components/atoms/Container/Container";
 import { Section } from "@/components/organisms/Section/Section";
@@ -14,7 +14,7 @@ interface SearchPageProps {
 export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
     const { q } = await searchParams;
     return {
-        title: `Search Results for "${q || ''}" | MoneyHub`,
+        title: `Search Results for "${q || ''}" | Wealth Logik`,
         description: `Search results for ${q}`,
     };
 }

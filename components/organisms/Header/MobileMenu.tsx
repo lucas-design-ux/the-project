@@ -25,7 +25,7 @@ interface MobileMenuProps {
 
 export default function MobileMenu({ categories, tools }: MobileMenuProps) {
     const [isOpen, setIsOpen] = useState(false);
-    const [openSection, setOpenSection] = useState<'articles' | 'tools' | null>(null);
+    const [openSection, setOpenSection] = useState<'articles' | 'tools' | 'institution' | null>(null);
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -44,7 +44,7 @@ export default function MobileMenu({ categories, tools }: MobileMenuProps) {
         };
     }, [isOpen]);
 
-    const toggleSection = (section: 'articles' | 'tools') => {
+    const toggleSection = (section: 'articles' | 'tools' | 'institution') => {
         setOpenSection(openSection === section ? null : section);
     };
 
@@ -139,14 +139,24 @@ export default function MobileMenu({ categories, tools }: MobileMenuProps) {
                         </div>
                     </div>
 
+                    {/* Institution Accordion */}
+                    <div className="flex flex-col border-b border-border/50 pb-6">
+                        <button
+                            onClick={() => toggleSection('institution')}
+                            className="flex items-center justify-between w-full text-left text-sm font-medium uppercase tracking-wide text-foreground outline-none py-2"
+                        >
+                            Institution
+                            <ChevronDown className={`h-4 w-4 opacity-70 transition-transform duration-300 ${openSection === 'institution' ? '-rotate-180' : ''}`} />
+                        </button>
+                        <div className={`flex flex-col gap-3 overflow-hidden transition-all duration-300 ${openSection === 'institution' ? 'mt-4 max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                            <Link href="/about" onClick={closeMenu} className="text-[15px] font-medium transition-colors hover:text-foreground text-muted-foreground pl-2">About</Link>
+                            <Link href="/editorial-policy" onClick={closeMenu} className="text-[15px] font-medium transition-colors hover:text-foreground text-muted-foreground pl-2">Editorial Policy</Link>
+                            <Link href="/policy-and-privacy" onClick={closeMenu} className="text-[15px] font-medium transition-colors hover:text-foreground text-muted-foreground pl-2">Policy and Privacy</Link>
+                        </div>
+                    </div>
+
                     {/* Static Links */}
                     <div className="flex flex-col gap-5 pt-2">
-                        <Link href="/policy-and-privacy" onClick={closeMenu} className="text-[15px] font-medium uppercase tracking-wide transition-colors hover:text-foreground text-muted-foreground">
-                            Policy and Privacy
-                        </Link>
-                        <Link href="/about" onClick={closeMenu} className="text-[15px] font-medium uppercase tracking-wide transition-colors hover:text-foreground text-muted-foreground">
-                            About
-                        </Link>
                         <Link href="/contact" onClick={closeMenu} className="text-[15px] font-medium uppercase tracking-wide transition-colors hover:text-foreground text-muted-foreground">
                             Contact
                         </Link>

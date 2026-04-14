@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-import { cms } from "@/lib/cms/adapters/mock";
+import { cms } from "@/lib/cms";
 import CategoryHeader from "@/components/organisms/CategoryHeader/CategoryHeader";
 import ArticleGrid from "@/components/organisms/ArticleGrid/ArticleGrid";
 import Pagination from "@/components/molecules/Pagination/Pagination";
@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
     }
 
     return {
-        title: `${category.name} | Master Template`,
+        title: category.name,
         description: category.description,
     };
 }
@@ -44,7 +44,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
     }
 
     const page = Number(pageParam) || 1;
-    const limit = 1;
+    const limit = 12;
 
     // Updated CMS call with destructuring
     const { articles, totalPages } = await cms.getArticlesByCategory(slug, { page, limit });

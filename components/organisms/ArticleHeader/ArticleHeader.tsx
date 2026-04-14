@@ -8,7 +8,7 @@ interface ArticleHeaderProps {
 
 export default function ArticleHeader({ article }: ArticleHeaderProps) {
     return (
-        <header className="mx-auto max-w-3xl space-y-10 pb-12">
+        <header className="space-y-10 pb-0">
             <div className="space-y-8">
                 <Link
                     href={`/category/${article.category.slug}`}
@@ -16,18 +16,24 @@ export default function ArticleHeader({ article }: ArticleHeaderProps) {
                 >
                     {article.category.name}
                 </Link>
-                <h1 className="font-serif text-5xl font-normal leading-[1.1] tracking-tight sm:text-6xl md:text-7xl lg:text-8xl max-w-4xl">
+                <h1 className="font-serif text-5xl font-normal leading-[1.1] tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
                     {article.title}
                 </h1>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground pt-6 border-t border-border/50">
                     <div className="flex items-center gap-3">
                         <div className="relative h-12 w-12 overflow-hidden rounded-full bg-muted">
-                            <Image
-                                src={article.author.avatar}
-                                alt={article.author.name}
-                                fill
-                                className="object-cover"
-                            />
+                            {article.author.name === "WealthLogik Editorial" ? (
+                                <div className="flex h-full w-full items-center justify-center bg-foreground text-background font-serif font-bold tracking-widest text-sm">
+                                    WL
+                                </div>
+                            ) : (
+                                <Image
+                                    src={article.author.avatar}
+                                    alt={article.author.name}
+                                    fill
+                                    className="object-cover"
+                                />
+                            )}
                         </div>
                         <div className="flex flex-col gap-1">
                             <span className="font-medium text-foreground">{article.author.name}</span>

@@ -9,9 +9,9 @@ export default function RelatedArticles({ articles }: RelatedArticlesProps) {
     if (!articles || articles.length === 0) return null;
 
     return (
-        <section className="border-t py-24 md:py-48">
+        <section className="py-12 md:py-16">
             <div className="container">
-                <h2 className="mb-16 text-3xl font-bold font-serif tracking-tight">Read Next</h2>
+                <h2 className="mb-10 text-3xl font-bold font-serif tracking-tight">Read Next</h2>
                 <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
                     {articles.map((article) => (
                         <ArticleCard key={article.id} article={article} variant="compact" />

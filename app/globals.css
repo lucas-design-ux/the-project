@@ -79,14 +79,14 @@
   --accent: 0 0% 40%;
   --accent-foreground: 0 0% 98%;
   --muted: 0 0% 96%;
-  --muted-foreground: 0 0% 45%;
+  --muted-foreground: 0 0% 40%;
   --border: 0 0% 90%;
   --input: 0 0% 90%;
   --ring: 0 0% 10%;
   --radius: 0rem;
 
-  /* Fluid Typography Scale */
-  --font-size-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  /* Fluid Typography Scale — minimum 14px for metadata/readability */
+  --font-size-xs: clamp(0.8125rem, 0.75rem + 0.25vw, 0.875rem);
   --font-size-sm: clamp(0.875rem, 0.825rem + 0.25vw, 1rem);
   --font-size-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
   --font-size-lg: clamp(1.125rem, 1.05rem + 0.375vw, 1.375rem);
@@ -218,6 +218,19 @@ img {
   image-rendering: crisp-edges;
 }
 
+/* Global focus-visible — consistent keyboard navigation */
+:focus-visible {
+  outline: 2px solid hsl(var(--foreground));
+  outline-offset: 2px;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 0;
+}
+
 /* Editorial Container */
 .editorial-container {
   margin-left: auto;
@@ -307,4 +320,213 @@ button {
   .ticker-marquee {
     animation: none;
   }
+}
+
+/* =========================================================
+   ARTICLE PROSE OVERRIDES
+   ========================================================= */
+
+/* Tables — responsive scroll + clean styling */
+.prose table {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-collapse: collapse;
+  width: 100%;
+  font-size: var(--font-size-sm);
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.25rem;
+}
+
+.prose table th,
+.prose table td {
+  padding: 0.75rem 1rem;
+  border: 1px solid hsl(var(--border));
+  white-space: normal;
+  word-break: break-word;
+  min-width: 120px;
+  vertical-align: top;
+}
+
+.prose table th {
+  background: hsl(var(--muted));
+  font-weight: 600;
+  text-align: left;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.prose table tbody tr:nth-child(even) {
+  background: hsl(var(--muted) / 0.3);
+}
+
+.prose table tbody tr:hover {
+  background: hsl(var(--muted) / 0.5);
+}
+
+/* Heading hierarchy — visual distinction */
+.prose h2 {
+  margin-top: 3.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.prose h3 {
+  margin-top: 2.5rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Lists in prose */
+.prose ul,
+.prose ol {
+  padding-left: 1.5rem;
+}
+
+.prose li {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Paragraph spacing — whitespace between paragraphs aids readability */
+.prose p {
+  margin-top: 2em;
+  margin-bottom: 2em;
+}
+
+.prose p:first-child {
+  margin-top: 0;
+}
+
+/* =========================================================
+   READING PROGRESS BAR
+   ========================================================= */
+
+.reading-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)));
+  z-index: 9999;
+  transition: width 0.1s linear;
+}
+
+/* =========================================================
+   AD SLOT PLACEHOLDERS
+   ========================================================= */
+
+.ad-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: hsl(var(--muted) / 0.4);
+  border: 2px dashed hsl(var(--border));
+  border-radius: 0.25rem;
+  color: hsl(var(--muted-foreground));
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+/* Leaderboard: single fluid horizontal banner */
+.ad-slot--leaderboard {
+  height: 60px;
+}
+
+@media (min-width: 768px) {
+  .ad-slot--leaderboard {
+    height: 90px;
+  }
+}
+
+/* =========================================================
+   TOOL SLIDERS
+   ========================================================= */
+
+/*
+  --pct is injected as an inline style on each <input> element
+  and represents the current value as a percentage (0–100).
+  Left of thumb  → black  (active / filled)
+  Right of thumb → #e5e7eb (light gray, inactive / empty)
+*/
+.tool-slider {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 100%;
+  height: 4px !important;
+  padding: 0 !important;
+  border-radius: 9999px;
+  outline: none;
+  cursor: pointer;
+  background: linear-gradient(
+    to right,
+    hsl(var(--foreground)) 0%,
+    hsl(var(--foreground)) var(--pct, 0%),
+    #e5e7eb var(--pct, 0%),
+    #e5e7eb 100%
+  ) !important;
+  background-clip: border-box !important;
+  transition: background 0.1s ease;
+}
+
+/* Thumb — WebKit (Chrome, Safari, Edge) */
+.tool-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: hsl(var(--foreground));
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tool-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.tool-slider:active::-webkit-slider-thumb {
+  transform: scale(1.2);
+}
+
+/* Thumb — Firefox */
+.tool-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: hsl(var(--foreground));
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+/* Track — Firefox */
+.tool-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 9999px;
+  background: transparent;
+}
+
+.tool-slider::-moz-range-progress {
+  height: 4px;
+  border-radius: 9999px;
+  background: hsl(var(--foreground));
+}
+
+/* Dark mode: use the CSS border token instead of hardcoded light grey */
+.dark .tool-slider {
+  background: linear-gradient(
+    to right,
+    hsl(var(--foreground)) 0%,
+    hsl(var(--foreground)) var(--pct, 0%),
+    hsl(var(--border)) var(--pct, 0%),
+    hsl(var(--border)) 100%
+  ) !important;
 }

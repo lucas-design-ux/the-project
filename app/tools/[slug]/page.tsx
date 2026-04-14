@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 
 // Lazy load all tool components for optimal performance
 const SavingsGoalCalculator = dynamic(
@@ -59,7 +60,7 @@ export async function generateMetadata({ params }: ToolPageProps): Promise<Metad
     }
 
     return {
-        title: `${tool.name} | MoneyHub`,
+        title: `${tool.name} | Wealth Logik`,
         description: tool.description,
     };
 }
@@ -75,8 +76,25 @@ export default async function ToolPage({ params }: ToolPageProps) {
     const ToolComponent = tool.component;
 
     return (
-        <div className="container max-w-5xl py-32 md:py-64">
+        <div className="container max-w-5xl px-4 py-16 md:py-24">
             <div className="space-y-8">
+                {/* Breadcrumb */}
+                <nav aria-label="Breadcrumb">
+                    <ol className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+                        <li>
+                            <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
+                        </li>
+                        <li aria-hidden="true" className="text-muted-foreground/50">›</li>
+                        <li>
+                            <Link href="/tools" className="hover:text-foreground transition-colors">Tools</Link>
+                        </li>
+                        <li aria-hidden="true" className="text-muted-foreground/50">›</li>
+                        <li>
+                            <span className="text-foreground/70">{tool.name}</span>
+                        </li>
+                    </ol>
+                </nav>
+
                 <div className="space-y-4">
                     <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
                         Interactive Tool
@@ -85,12 +103,12 @@ export default async function ToolPage({ params }: ToolPageProps) {
                     <p className="text-xl text-muted-foreground max-w-2xl">{tool.description}</p>
                 </div>
 
-                <div className="rounded-lg border border-border bg-card p-6 md:p-8">
+                <div className="rounded-lg border border-border bg-card p-6 md:p-8" aria-live="polite">
                     <ToolComponent />
                 </div>
 
                 <div className="rounded-lg border border-muted bg-muted/50 p-6">
-                    <h3 className="text-sm font-semibold mb-2">How to use this tool</h3>
+                    <h2 className="text-sm font-semibold mb-2">How to use this tool</h2>
                     <p className="text-sm text-muted-foreground">
                         {slug === "savings-goal-calculator" && "Adjust the sliders to match your situation. The calculator updates in real-time to show you exactly how long it'll take to hit your goal. Pro tip: small increases in your monthly contribution can dramatically reduce the time needed!"}
                         {slug === "wealth-growth-simulator" && "Use the sliders to model different investment scenarios. Watch how time and consistent contributions create exponential growth. Try doubling your time horizon or monthly contribution to see the dramatic impact."}
