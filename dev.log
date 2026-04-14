@@ -1,0 +1,17 @@
+
+> the-blog@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.4:3000
+
+✓ Starting...
+✓ Ready in 567ms
+ GET /tools 200 in 1764ms (compile: 1064ms, render: 700ms)
+ GET /tools 200 in 303ms (compile: 2ms, render: 301ms)
+ GET / 200 in 2.7s (compile: 1441ms, render: 1241ms)
+ GET / 200 in 2.6s (compile: 1374ms, render: 1212ms)
+ GET / 200 in 1229ms (compile: 7ms, render: 1222ms)
+ GET / 200 in 1236ms (compile: 17ms, render: 1219ms)
+ GET /tools 200 in 106ms (compile: 17ms, render: 89ms)

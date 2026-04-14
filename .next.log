@@ -1,0 +1,20 @@
+
+> the-blog@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.4:3000
+
+✓ Starting...
+✓ Ready in 390ms
+[MarketTicker] Fetched 10 real currency rates
+ GET /article/justify-small-luxuries-budget 200 in 1514ms (compile: 601ms, render: 913ms)
+[MarketTicker] Fetched 10 real currency rates
+ GET /api/health 404 in 225ms (compile: 193ms, render: 32ms)
+[MarketTicker] Fetched 10 real currency rates
+ GET /article/justifying-debt 404 in 326ms (compile: 5ms, render: 321ms)
+✓ Compiled in 222ms
+ GET / 200 in 898ms (compile: 47ms, render: 851ms)
+[MarketTicker] Fetched 10 real currency rates
+ GET / 200 in 917ms (compile: 6ms, render: 912ms)
