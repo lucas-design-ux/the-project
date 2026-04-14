@@ -4,14 +4,19 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
   enabled: process.env.ANALYZE === "true",
 });
 
-// Começamos com a configuração de produção, sem nada local.
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
-      // Somente as URLs de produção permitidas
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "1337",
+        pathname: "/uploads/**",
+      },
       {
         protocol: "https",
         hostname: "api.wealthlogik.com",
+        port: "",
         pathname: "/uploads/**",
       },
       {
@@ -25,14 +30,17 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "images.unsplash.com",
+        port: "",
         pathname: "/**",
       },
     ],
-    minimumCacheTTL: 31536000, // 1 year
+    minimumCacheTTL: 31536000, // 1 year for images
+    dangerouslyAllowLocalIP: true, // Allow Strapi images from localhost in dev
   },
 
   async headers() {
     return [
+      // Cache static images aggressively
       {
         source: "/:all*(svg|jpg|jpeg|png|gif|webp|avif)",
         headers: [
@@ -42,21 +50,10 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // Note: Removed the immutable cache for /_next/static/ to prevent dev-mode lock-in
     ];
   },
 };
 
-// A MÁGICA: Se estivermos no ambiente de desenvolvimento local, injetamos as regras perigosas.
-if (process.env.NODE_ENV === 'development') {
-  if (nextConfig.images) {
-    nextConfig.images.remotePatterns?.push({
-      protocol: "http",
-      hostname: "localhost",
-      port: "1337",
-      pathname: "/uploads/**",
-    });
-    nextConfig.images.dangerouslyAllowLocalIP = true;
-  }
-}
+export default withBundleAnalyzer(nextConfig);
 
-export default withBundle_analyzer(nextConfig);
