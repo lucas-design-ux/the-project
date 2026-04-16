@@ -117,8 +117,7 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, 
     const options: HTMLReactParserOptions = {
         replace: (domNode) => {
             if (domNode instanceof Element) {
-                // Nova Lógica Segura: Extrair o Spoke diretamente do Container <aside> rico 
-                // e preservar o Link gerado originalmente pelo CMS.
+                // Intercept in case the structure is actually <aside>
                 if (domNode.tagName === "aside") {
                     const hasDataAttr = domNode.attribs && domNode.attribs['data-cms-spoke'] !== undefined;
                     const hasClass = domNode.attribs && domNode.attribs.class && domNode.attribs.class.includes('wealthlogik-spoke-teaser');
@@ -127,7 +126,6 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, 
                         let originalHref = "";
                         let anchorText = "";
 
-                        // Busca profundidade para encontrar a tag <a> correta dentro do aside
                         const findAnchorInAside = (node: any): boolean => {
                             if (node.type === "tag" && node.name === "a") {
                                 originalHref = node.attribs?.href || "";
@@ -141,7 +139,6 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, 
                         };
                         findAnchorInAside(domNode);
 
-                        // Se encontrou a âncora viva do CMS, renderizamos o Banner sem quebrar o HTML com `#`
                         if (originalHref && originalHref !== "#") {
                             return (
                                 <RelatedLinkBanner
@@ -154,15 +151,66 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, 
                     }
                 }
 
-                // Handle H2 injections for interactive tools
+                // Intercept the entire <p> that houses the fake link to prevent hydration errors!
+                if (domNode.tagName === "p") {
+                    let hasFakeLink = false;
+                    
+                    const findFakeAnchor = (node: any): boolean => {
+                        if (node.type === "tag" && node.name === "a") {
+                            const href = node.attribs?.href || "";
+                            if (href === "#" || href === "") {
+                                hasFakeLink = true;
+                                return true;
+                            }
+                        }
+                        if (node.children && Array.isArray(node.children)) {
+                            return node.children.some(findFakeAnchor);
+                        }
+                        return false;
+                    }
+                    findFakeAnchor(domNode);
+
+                    // If this exact Paragraph contains an <a href="#"> inside it
+                    if (hasFakeLink) {
+                        if (activeSpoke && activeSpoke.inserted_url) {
+                            const banner = (
+                                <RelatedLinkBanner
+                                    url={activeSpoke.inserted_url}
+                                    title={activeSpoke.suggested_topic}
+                                    label="Deep Dive"
+                                />
+                            );
+                            
+                            // Consume to prevent bleeding into next block
+                            activeSpoke = null;
+                            return banner;
+                        }
+                        
+                        // Devour the broken fake link block if there's no data
+                        return <React.Fragment />;
+                    }
+                }
+
+                // Handle H2 injections for interactive tools & Track Spoke Blocks
                 if (domNode.tagName === "h2") {
                     h2Counter++;
 
                     const textContent = getTextContent(domNode).trim();
                     const matchedTools: InjectedTool[] = [];
+                    
+                    // Rastreio determinístico: Qual Spoke pertence a este H2 lido?
+                    if (cmsSpokeMapping && cmsSpokeMapping.length > 0) {
+                        activeSpoke = cmsSpokeMapping.find(s => {
+                            if (!s.h2_referenced) return false;
+                            
+                            const refLower = s.h2_referenced.trim().toLowerCase();
+                            const currentH2Lower = textContent.toLowerCase();
+                            
+                            return currentH2Lower === refLower || currentH2Lower.includes(refLower);
+                        }) || null;
+                    }
 
                     if (tools && tools.length > 0) {
-                        // Check if there are any tools matching this position
                         tools.forEach((t) => {
                             let shouldInject = false;
 
@@ -176,7 +224,6 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, 
                             }
 
                             if (shouldInject) {
-                                // Enforce limits: 1 inline, 1 CTA
                                 if (t.format === "inline" && injectedInlineCount >= 1) return;
                                 if (t.format === "cta" && injectedCTACount >= 1) return;
 
@@ -189,7 +236,6 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, 
                     }
 
                     if (matchedTools.length > 0) {
-                        // Inject tools immediately following the matched H2
                         return (
                             <React.Fragment key={`h2-${h2Counter}`}>
                                 <h2>{domToReact(domNode.children as DOMNode[], options)}</h2>
