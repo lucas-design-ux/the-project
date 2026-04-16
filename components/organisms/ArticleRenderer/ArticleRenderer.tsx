@@ -12,6 +12,7 @@ import { Loader2 } from "lucide-react";
 interface ArticleRendererProps {
     content_html: string;
     tools?: InjectedTool[];
+    validSlugs?: string[];
 }
 
 const ToolSkeleton = () => (
@@ -82,8 +83,11 @@ const getTextContent = (node: any): string => {
     return "";
 };
 
-export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, tools }) => {
+export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, tools, validSlugs }) => {
     const sanitizedContent = DOMPurify.sanitize(content_html);
+
+    // Build a Set for O(1) slug lookups
+    const validSlugSet = validSlugs ? new Set(validSlugs) : null;
 
     // Track usage to enforce max 1 inline, 1 CTA
     let injectedInlineCount = 0;
@@ -98,18 +102,22 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, 
                     const href = (domNode.attribs?.href || "").trim();
 
                     // 1. Rewrite absolute internal URLs: https://wealthlogik.com/{slug} → /article/{slug}
-                    //    The pipeline generates URLs without /article/ prefix
+                    //    Only rewrite if the slug exists in Strapi (prevents fake placeholder links)
                     if (href.includes("wealthlogik.com/") && !href.includes("/article/")) {
                         try {
                             const url = new URL(href);
                             const slug = url.pathname.replace(/^\/|\/$/g, ""); // strip leading/trailing slashes
                             if (slug && !slug.includes("/")) {
-                                // Single-segment path = article slug
-                                return (
-                                    <a href={`/article/${slug}`}>
-                                        {domToReact(domNode.children as DOMNode[], options)}
-                                    </a>
-                                );
+                                // Validate: only link to slugs that actually exist
+                                if (validSlugSet && validSlugSet.has(slug)) {
+                                    return (
+                                        <a href={`/article/${slug}`}>
+                                            {domToReact(domNode.children as DOMNode[], options)}
+                                        </a>
+                                    );
+                                }
+                                // Slug doesn't exist — render as plain text
+                                return <span>{domToReact(domNode.children as DOMNode[], options)}</span>;
                             }
                         } catch {
                             // Invalid URL, fall through to default rendering

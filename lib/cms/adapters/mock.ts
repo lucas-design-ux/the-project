@@ -891,6 +891,10 @@ export class MockCMSAdapter implements CMSAdapter {
         // Mock: no spoke_meta in mock data, return empty
         return mockArticles.filter(a => a.slug !== currentArticleSlug).slice(0, limit);
     }
+
+    async getAllSlugs(): Promise<Set<string>> {
+        return new Set(mockArticles.map(a => a.slug));
+    }
 }
 
 export const cms = new MockCMSAdapter();

@@ -95,4 +95,5 @@ export interface CMSAdapter {
     searchArticles(query: string): Promise<Article[]>;
     getPillarArticles(): Promise<Article[]>;
     getSiblingSpokes(parentPillarSlug: string, currentArticleSlug: string, limit: number): Promise<Article[]>;
+    getAllSlugs(): Promise<Set<string>>;
 }

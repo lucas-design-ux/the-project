@@ -70,7 +70,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         notFound();
     }
 
-    const relatedArticles = await cms.getRelatedArticles(article.id);
+    const [relatedArticles, validSlugs] = await Promise.all([
+        cms.getRelatedArticles(article.id),
+        cms.getAllSlugs(),
+    ]);
 
     return (
         <article className="min-h-screen">
@@ -134,6 +137,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                             <ArticleRenderer
                                 content_html={article.content}
                                 tools={article.tools}
+                                validSlugs={Array.from(validSlugs)}
                             />
 
                             <div className="mt-10">

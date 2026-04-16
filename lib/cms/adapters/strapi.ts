@@ -486,4 +486,18 @@ export class StrapiCMSAdapter implements CMSAdapter {
         );
         return res.data.map(strapiToArticle);
     }
+
+    // -----------------------------------------------------------------------
+    // getAllSlugs — lightweight fetch of all article slugs for link validation
+    // -----------------------------------------------------------------------
+    async getAllSlugs(): Promise<Set<string>> {
+        const res = await strapiFetch<StrapiListResponse<{ slug: string }>>(
+            "/api/articles",
+            {
+                "fields[0]": "slug",
+                "pagination[pageSize]": "200",
+            }
+        );
+        return new Set(res.data.map((d) => (d as any).slug ?? (d as any).attributes?.slug));
+    }
 }
