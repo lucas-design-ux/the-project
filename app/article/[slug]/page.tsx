@@ -48,6 +48,20 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
     };
 }
 
+/** Rewrite absolute wealthlogik.com/{slug} → /article/{slug} */
+function rewriteInternalUrl(rawUrl: string): string {
+    try {
+        const url = new URL(rawUrl);
+        if (url.hostname.includes("wealthlogik.com")) {
+            const slug = url.pathname.replace(/^\/|\/$/g, "");
+            if (slug && !slug.includes("/")) {
+                return `/article/${slug}`;
+            }
+        }
+    } catch { /* not a valid URL */ }
+    return rawUrl;
+}
+
 export default async function ArticlePage({ params }: ArticlePageProps) {
     const { slug } = await params;
     const article = await cms.getArticleBySlug(slug);
@@ -87,7 +101,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                             article.spokeMeta?.parent_pillar_title && article.spokeMeta?.parent_pillar_url
                                 ? {
                                       title: article.spokeMeta.parent_pillar_title,
-                                      url: article.spokeMeta.parent_pillar_url,
+                                      url: rewriteInternalUrl(article.spokeMeta.parent_pillar_url),
                                   }
                                 : undefined
                         }
@@ -102,7 +116,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
                     {article.spokeMeta?.parent_pillar_url && article.spokeMeta?.parent_pillar_title && (
                         <RelatedLinkBanner
-                            url={article.spokeMeta.parent_pillar_url}
+                            url={rewriteInternalUrl(article.spokeMeta.parent_pillar_url)}
                             title={article.spokeMeta.parent_pillar_title}
                             label="Part of our comprehensive guide on"
                         />
@@ -120,7 +134,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                             <ArticleRenderer
                                 content_html={article.content}
                                 tools={article.tools}
-                                cmsSpokeMapping={article.cmsSpokeMapping}
                             />
 
                             <div className="mt-10">

@@ -4,7 +4,7 @@ import React from "react";
 import dynamic from "next/dynamic";
 import parse, { Element, domToReact, HTMLReactParserOptions, DOMNode } from "html-react-parser";
 import DOMPurify from "isomorphic-dompurify";
-import { InjectedTool, SpokeMapping } from "@/lib/cms/interface";
+import { InjectedTool } from "@/lib/cms/interface";
 import { ToolCTA } from "@/components/molecules/ToolCTA/ToolCTA";
 import InlineCompactProvider from "@/components/tools/InlineCompactProvider/InlineCompactProvider";
 import { Loader2 } from "lucide-react";
@@ -12,7 +12,6 @@ import { Loader2 } from "lucide-react";
 interface ArticleRendererProps {
     content_html: string;
     tools?: InjectedTool[];
-    cmsSpokeMapping?: SpokeMapping[];
 }
 
 const ToolSkeleton = () => (
@@ -83,36 +82,7 @@ const getTextContent = (node: any): string => {
     return "";
 };
 
-
-
-// Match anchor text against spoke topics by word overlap (60% threshold)
-const findMatchingSpoke = (anchorText: string, mappings: SpokeMapping[]): SpokeMapping | null => {
-    const anchorWords = anchorText.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
-    if (anchorWords.length === 0) return null;
-
-    let bestMatch: SpokeMapping | null = null;
-    let bestRatio = 0;
-
-    for (const spoke of mappings) {
-        if (!spoke.suggested_topic || !spoke.inserted_url) continue;
-        const topicWords = spoke.suggested_topic.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
-        if (topicWords.length === 0) continue;
-
-        let hits = 0;
-        for (const word of topicWords) {
-            if (anchorWords.includes(word)) hits++;
-        }
-        const ratio = hits / topicWords.length;
-        if (ratio > bestRatio) {
-            bestRatio = ratio;
-            bestMatch = spoke;
-        }
-    }
-
-    return bestRatio >= 0.5 ? bestMatch : null;
-};
-
-export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, tools, cmsSpokeMapping }) => {
+export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, tools }) => {
     const sanitizedContent = DOMPurify.sanitize(content_html);
 
     // Track usage to enforce max 1 inline, 1 CTA
@@ -123,24 +93,31 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, 
     const options: HTMLReactParserOptions = {
         replace: (domNode) => {
             if (domNode instanceof Element) {
-                // Fix broken spoke links: <a href="#"> → <a href="/real-spoke-url">
+                // Fix internal links: rewrite absolute wealthlogik.com URLs to /article/ path
                 if (domNode.tagName === "a") {
                     const href = (domNode.attribs?.href || "").trim();
 
-                    if ((href === "#" || href === "") && cmsSpokeMapping && cmsSpokeMapping.length > 0) {
-                        const anchorText = getTextContent(domNode).trim();
-                        const match = findMatchingSpoke(anchorText, cmsSpokeMapping);
-
-                        if (match) {
-                            // Preserve children (bold, spans, etc) — just fix the href
-                            return (
-                                <a href={match.inserted_url} className="text-primary underline font-semibold">
-                                    {domToReact(domNode.children as DOMNode[], options)}
-                                </a>
-                            );
+                    // 1. Rewrite absolute internal URLs: https://wealthlogik.com/{slug} → /article/{slug}
+                    //    The pipeline generates URLs without /article/ prefix
+                    if (href.includes("wealthlogik.com/") && !href.includes("/article/")) {
+                        try {
+                            const url = new URL(href);
+                            const slug = url.pathname.replace(/^\/|\/$/g, ""); // strip leading/trailing slashes
+                            if (slug && !slug.includes("/")) {
+                                // Single-segment path = article slug
+                                return (
+                                    <a href={`/article/${slug}`}>
+                                        {domToReact(domNode.children as DOMNode[], options)}
+                                    </a>
+                                );
+                            }
+                        } catch {
+                            // Invalid URL, fall through to default rendering
                         }
+                    }
 
-                        // No match found — render as plain text to kill the scroll-to-top
+                    // 2. Kill broken href="#" links — render as plain text to prevent scroll-to-top
+                    if (href === "#" || href === "") {
                         return <span>{domToReact(domNode.children as DOMNode[], options)}</span>;
                     }
                 }
