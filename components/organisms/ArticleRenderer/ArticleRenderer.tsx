@@ -8,7 +8,6 @@ import { InjectedTool, SpokeMapping } from "@/lib/cms/interface";
 import { ToolCTA } from "@/components/molecules/ToolCTA/ToolCTA";
 import InlineCompactProvider from "@/components/tools/InlineCompactProvider/InlineCompactProvider";
 import { Loader2 } from "lucide-react";
-import RelatedLinkBanner from "@/components/molecules/RelatedLinkBanner/RelatedLinkBanner";
 
 interface ArticleRendererProps {
     content_html: string;
@@ -86,21 +85,31 @@ const getTextContent = (node: any): string => {
 
 
 
-// Helper to determine the ratio of topic words present in the source text
-const getWordMatchRatio = (sourceText: string, targetTopic: string): number => {
-    const sourceWords = sourceText.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
-    const targetWords = targetTopic.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
+// Match anchor text against spoke topics by word overlap (60% threshold)
+const findMatchingSpoke = (anchorText: string, mappings: SpokeMapping[]): SpokeMapping | null => {
+    const anchorWords = anchorText.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
+    if (anchorWords.length === 0) return null;
 
-    if (targetWords.length === 0) return 0;
+    let bestMatch: SpokeMapping | null = null;
+    let bestRatio = 0;
 
-    let matchCount = 0;
-    targetWords.forEach(word => {
-        if (sourceWords.includes(word)) {
-            matchCount++;
+    for (const spoke of mappings) {
+        if (!spoke.suggested_topic || !spoke.inserted_url) continue;
+        const topicWords = spoke.suggested_topic.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
+        if (topicWords.length === 0) continue;
+
+        let hits = 0;
+        for (const word of topicWords) {
+            if (anchorWords.includes(word)) hits++;
         }
-    });
+        const ratio = hits / topicWords.length;
+        if (ratio > bestRatio) {
+            bestRatio = ratio;
+            bestMatch = spoke;
+        }
+    }
 
-    return matchCount / targetWords.length;
+    return bestRatio >= 0.5 ? bestMatch : null;
 };
 
 export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, tools, cmsSpokeMapping }) => {
@@ -110,47 +119,29 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, 
     let injectedInlineCount = 0;
     let injectedCTACount = 0;
     let h2Counter = 0;
-    
-    // Deterministic Spoke Tracking state
-    let activeSpoke: SpokeMapping | null = null;
 
     const options: HTMLReactParserOptions = {
         replace: (domNode) => {
             if (domNode instanceof Element) {
-                // Nova Lógica Segura: Extrair o Spoke diretamente do Container <aside> rico 
-                // e preservar o Link gerado originalmente pelo CMS.
-                if (domNode.tagName === "aside") {
-                    const hasDataAttr = domNode.attribs && domNode.attribs['data-cms-spoke'] !== undefined;
-                    const hasClass = domNode.attribs && domNode.attribs.class && domNode.attribs.class.includes('wealthlogik-spoke-teaser');
+                // Fix broken spoke links: <a href="#"> → <a href="/real-spoke-url">
+                if (domNode.tagName === "a") {
+                    const href = (domNode.attribs?.href || "").trim();
 
-                    if (hasDataAttr || hasClass) {
-                        let originalHref = "";
-                        let anchorText = "";
+                    if ((href === "#" || href === "") && cmsSpokeMapping && cmsSpokeMapping.length > 0) {
+                        const anchorText = getTextContent(domNode).trim();
+                        const match = findMatchingSpoke(anchorText, cmsSpokeMapping);
 
-                        // Busca profundidade para encontrar a tag <a> correta dentro do aside
-                        const findAnchorInAside = (node: any): boolean => {
-                            if (node.type === "tag" && node.name === "a") {
-                                originalHref = node.attribs?.href || "";
-                                anchorText = getTextContent(node).trim();
-                                return true;
-                            }
-                            if (node.children && Array.isArray(node.children)) {
-                                return node.children.some(findAnchorInAside);
-                            }
-                            return false;
-                        };
-                        findAnchorInAside(domNode);
-
-                        // Se encontrou a âncora viva do CMS, renderizamos o Banner sem quebrar o HTML com `#`
-                        if (originalHref && originalHref !== "#") {
+                        if (match) {
+                            // Preserve children (bold, spans, etc) — just fix the href
                             return (
-                                <RelatedLinkBanner
-                                    url={originalHref}
-                                    title={anchorText || "Read More"}
-                                    label="Deep Dive"
-                                />
+                                <a href={match.inserted_url} className="text-primary underline font-semibold">
+                                    {domToReact(domNode.children as DOMNode[], options)}
+                                </a>
                             );
                         }
+
+                        // No match found — render as plain text to kill the scroll-to-top
+                        return <span>{domToReact(domNode.children as DOMNode[], options)}</span>;
                     }
                 }
 
