@@ -4,14 +4,16 @@ import React from "react";
 import dynamic from "next/dynamic";
 import parse, { Element, domToReact, HTMLReactParserOptions, DOMNode } from "html-react-parser";
 import DOMPurify from "isomorphic-dompurify";
-import { InjectedTool } from "@/lib/cms/interface";
+import { InjectedTool, SpokeMapping } from "@/lib/cms/interface";
 import { ToolCTA } from "@/components/molecules/ToolCTA/ToolCTA";
 import InlineCompactProvider from "@/components/tools/InlineCompactProvider/InlineCompactProvider";
 import { Loader2 } from "lucide-react";
+import RelatedLinkBanner from "@/components/molecules/RelatedLinkBanner/RelatedLinkBanner";
 
 interface ArticleRendererProps {
     content_html: string;
     tools?: InjectedTool[];
+    cmsSpokeMapping?: SpokeMapping[];
 }
 
 const ToolSkeleton = () => (
@@ -82,59 +84,121 @@ const getTextContent = (node: any): string => {
     return "";
 };
 
-export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, tools }) => {
+
+
+// Helper to determine the ratio of topic words present in the source text
+const getWordMatchRatio = (sourceText: string, targetTopic: string): number => {
+    const sourceWords = sourceText.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
+    const targetWords = targetTopic.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
+
+    if (targetWords.length === 0) return 0;
+
+    let matchCount = 0;
+    targetWords.forEach(word => {
+        if (sourceWords.includes(word)) {
+            matchCount++;
+        }
+    });
+
+    return matchCount / targetWords.length;
+};
+
+export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, tools, cmsSpokeMapping }) => {
     const sanitizedContent = DOMPurify.sanitize(content_html);
 
     // Track usage to enforce max 1 inline, 1 CTA
     let injectedInlineCount = 0;
     let injectedCTACount = 0;
     let h2Counter = 0;
+    
+    // Deterministic Spoke Tracking state
+    let activeSpoke: SpokeMapping | null = null;
 
     const options: HTMLReactParserOptions = {
         replace: (domNode) => {
-            if (domNode instanceof Element && domNode.tagName === "h2") {
-                h2Counter++;
+            if (domNode instanceof Element) {
+                // Nova Lógica Segura: Extrair o Spoke diretamente do Container <aside> rico 
+                // e preservar o Link gerado originalmente pelo CMS.
+                if (domNode.tagName === "aside") {
+                    const hasDataAttr = domNode.attribs && domNode.attribs['data-cms-spoke'] !== undefined;
+                    const hasClass = domNode.attribs && domNode.attribs.class && domNode.attribs.class.includes('wealthlogik-spoke-teaser');
 
-                const textContent = getTextContent(domNode).trim();
-                const matchedTools: InjectedTool[] = [];
+                    if (hasDataAttr || hasClass) {
+                        let originalHref = "";
+                        let anchorText = "";
 
-                if (tools && tools.length > 0) {
-                    // Check if there are any tools matching this position
-                    tools.forEach((t) => {
-                        let shouldInject = false;
+                        // Busca profundidade para encontrar a tag <a> correta dentro do aside
+                        const findAnchorInAside = (node: any): boolean => {
+                            if (node.type === "tag" && node.name === "a") {
+                                originalHref = node.attribs?.href || "";
+                                anchorText = getTextContent(node).trim();
+                                return true;
+                            }
+                            if (node.children && Array.isArray(node.children)) {
+                                return node.children.some(findAnchorInAside);
+                            }
+                            return false;
+                        };
+                        findAnchorInAside(domNode);
 
-                        if (t.position === `after_h2_${h2Counter}`) {
-                            shouldInject = true;
-                        } else if (
-                            t.position === "after_conclusion" &&
-                            textContent.toLowerCase() === "the bottom line"
-                        ) {
-                            shouldInject = true;
+                        // Se encontrou a âncora viva do CMS, renderizamos o Banner sem quebrar o HTML com `#`
+                        if (originalHref && originalHref !== "#") {
+                            return (
+                                <RelatedLinkBanner
+                                    url={originalHref}
+                                    title={anchorText || "Read More"}
+                                    label="Deep Dive"
+                                />
+                            );
                         }
-
-                        if (shouldInject) {
-                            // Enforce limits: 1 inline, 1 CTA
-                            if (t.format === "inline" && injectedInlineCount >= 1) return;
-                            if (t.format === "cta" && injectedCTACount >= 1) return;
-
-                            if (t.format === "inline") injectedInlineCount++;
-                            if (t.format === "cta") injectedCTACount++;
-
-                            matchedTools.push(t);
-                        }
-                    });
+                    }
                 }
 
-                if (matchedTools.length > 0) {
-                    // Inject tools immediately following the matched H2
-                    return (
-                        <React.Fragment key={`h2-${h2Counter}`}>
-                            <h2>{domToReact(domNode.children as DOMNode[], options)}</h2>
-                            {matchedTools.map((t, idx) => (
-                                <ToolInjector key={`tool-${h2Counter}-${idx}`} tool={t} />
-                            ))}
-                        </React.Fragment>
-                    );
+                // Handle H2 injections for interactive tools
+                if (domNode.tagName === "h2") {
+                    h2Counter++;
+
+                    const textContent = getTextContent(domNode).trim();
+                    const matchedTools: InjectedTool[] = [];
+
+                    if (tools && tools.length > 0) {
+                        // Check if there are any tools matching this position
+                        tools.forEach((t) => {
+                            let shouldInject = false;
+
+                            if (t.position === `after_h2_${h2Counter}`) {
+                                shouldInject = true;
+                            } else if (
+                                t.position === "after_conclusion" &&
+                                textContent.toLowerCase() === "the bottom line"
+                            ) {
+                                shouldInject = true;
+                            }
+
+                            if (shouldInject) {
+                                // Enforce limits: 1 inline, 1 CTA
+                                if (t.format === "inline" && injectedInlineCount >= 1) return;
+                                if (t.format === "cta" && injectedCTACount >= 1) return;
+
+                                if (t.format === "inline") injectedInlineCount++;
+                                if (t.format === "cta") injectedCTACount++;
+
+                                matchedTools.push(t);
+                            }
+                        });
+                    }
+
+                    if (matchedTools.length > 0) {
+                        // Inject tools immediately following the matched H2
+                        return (
+                            <React.Fragment key={`h2-${h2Counter}`}>
+                                <h2>{domToReact(domNode.children as DOMNode[], options)}</h2>
+                                {matchedTools.map((t, idx) => (
+                                    <ToolInjector key={`tool-${h2Counter}-${idx}`} tool={t} />
+                                ))}
+                            </React.Fragment>
+                        );
+                    }
                 }
             }
         },

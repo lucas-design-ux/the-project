@@ -16,8 +16,8 @@ import ReadingProgressBar from "@/components/atoms/ReadingProgressBar/ReadingPro
 import AdSlot from "@/components/atoms/AdSlot/AdSlot";
 import PushNotificationBannerClient from "@/components/molecules/PushNotificationBanner/PushNotificationBannerClient";
 import ArticleSchema from "@/components/seo/ArticleSchema";
-import BreadcrumbSchema from "@/components/seo/BreadcrumbSchema";
 import FAQSchema from "@/components/seo/FAQSchema";
+import RelatedLinkBanner from "@/components/molecules/RelatedLinkBanner/RelatedLinkBanner";
 
 export const revalidate = 3600;
 
@@ -73,13 +73,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 parentPillarTitle={article.spokeMeta?.parent_pillar_title}
                 parentPillarUrl={article.spokeMeta?.parent_pillar_url}
             />
-            
-            <BreadcrumbSchema
-                hubTitle={article.category.name}
-                hubUrl={`https://wealthlogik.com/category/${article.category.slug}`}
-                articleTitle={article.title}
-                articleUrl={`https://wealthlogik.com/article/${article.slug}`}
-            />
 
             {article.faqSection && <FAQSchema faqs={article.faqSection} />}
 
@@ -90,6 +83,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                         hubName={article.category.name}
                         hubUrl={`/category/${article.category.slug}`}
                         articleTitle={article.title}
+                        parentPillar={
+                            article.spokeMeta?.parent_pillar_title && article.spokeMeta?.parent_pillar_url
+                                ? {
+                                      title: article.spokeMeta.parent_pillar_title,
+                                      url: article.spokeMeta.parent_pillar_url,
+                                  }
+                                : undefined
+                        }
                     />
 
                     <Suspense fallback={<ArticleHeaderSkeleton />}>
@@ -98,6 +99,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
                     {/* Executive Summary — "In 30 seconds:" */}
                     <ExecutiveSummary takeaways={article.keyTakeaways} />
+
+                    {article.spokeMeta?.parent_pillar_url && article.spokeMeta?.parent_pillar_title && (
+                        <RelatedLinkBanner
+                            url={article.spokeMeta.parent_pillar_url}
+                            title={article.spokeMeta.parent_pillar_title}
+                            label="Part of our comprehensive guide on"
+                        />
+                    )}
 
                     {/* Leaderboard ad — below summary, above content */}
                     <div className="mt-8">
@@ -108,7 +117,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                     <div className="mt-16 lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-12">
                         {/* Main content column */}
                         <div className="min-w-0">
-                                <ArticleRenderer content_html={article.content} tools={article.tools} />
+                            <ArticleRenderer
+                                content_html={article.content}
+                                tools={article.tools}
+                                cmsSpokeMapping={article.cmsSpokeMapping}
+                            />
 
                             <div className="mt-10">
                                 <NextStepsSection relatedTool={article.relatedTool} />
