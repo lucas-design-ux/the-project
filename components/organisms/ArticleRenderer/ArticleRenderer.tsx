@@ -89,6 +89,18 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, 
     // Build a Set for O(1) slug lookups
     const validSlugSet = validSlugs ? new Set(validSlugs) : null;
 
+    // Pre-extract real spoke slugs from the bunched <p class="spoke-link"> blocks
+    // These were appended by update_pillar_with_spoke_url and contain the REAL slugs
+    const realSpokeSlugs: string[] = [];
+    const spokeRegex = /class="spoke-link"[^>]*>.*?href="https?:\/\/(?:www\.)?wealthlogik\.com\/([^"\/]+)\/?"/g;
+    let spokeMatch;
+    while ((spokeMatch = spokeRegex.exec(sanitizedContent)) !== null) {
+        realSpokeSlugs.push(spokeMatch[1]);
+    }
+
+    // Counter to map each aside (in order) to the corresponding real spoke slug
+    let asideCounter = 0;
+
     // Track usage to enforce max 1 inline, 1 CTA
     let injectedInlineCount = 0;
     let injectedCTACount = 0;
@@ -97,6 +109,55 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, 
     const options: HTMLReactParserOptions = {
         replace: (domNode) => {
             if (domNode instanceof Element) {
+
+                // --- Aside spoke teaser: fix the fake slug with the real one ---
+                if (domNode.tagName === "aside" && domNode.attribs?.["data-cms-spoke"]) {
+                    const currentIndex = asideCounter++;
+                    const realSlug = realSpokeSlugs[currentIndex];
+
+                    // Extract link text from the original aside
+                    const findLinkText = (node: any): string => {
+                        if (node.tagName === "a") return getTextContent(node);
+                        if (node.children) {
+                            for (const child of node.children) {
+                                const found = findLinkText(child);
+                                if (found) return found;
+                            }
+                        }
+                        return "";
+                    };
+                    const originalLinkText = findLinkText(domNode);
+
+                    if (realSlug && validSlugSet?.has(realSlug)) {
+                        return (
+                            <aside className="wealthlogik-spoke-teaser my-8 rounded-lg border-l-4 border-primary/30 bg-primary/5 p-4">
+                                <p className="m-0">
+                                    <strong>
+                                        For a complete breakdown of this topic, read our deep dive guide on{" "}
+                                        <a href={`/article/${realSlug}`} className="text-primary underline font-semibold">
+                                            {originalLinkText}
+                                        </a>.
+                                    </strong>
+                                </p>
+                            </aside>
+                        );
+                    }
+
+                    // No real slug available — render as plain text
+                    return (
+                        <aside className="wealthlogik-spoke-teaser my-8 rounded-lg border-l-4 border-primary/30 bg-primary/5 p-4">
+                            <p className="m-0">
+                                {domToReact(domNode.children as DOMNode[], options)}
+                            </p>
+                        </aside>
+                    );
+                }
+
+                // --- Remove bunched spoke-link paragraphs (duplicates) ---
+                if (domNode.tagName === "p" && domNode.attribs?.class?.includes("spoke-link")) {
+                    return <></>;
+                }
+
                 // Fix internal links: rewrite absolute wealthlogik.com URLs to /article/ path
                 if (domNode.tagName === "a") {
                     const href = (domNode.attribs?.href || "").trim();
