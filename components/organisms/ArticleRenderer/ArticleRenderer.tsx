@@ -153,6 +153,75 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, 
                     );
                 }
 
+                // --- Beautiful Table of Contents (TOC) Interceptor ---
+                if (domNode.tagName === "nav" && domNode.attribs?.class?.includes("toc")) {
+                    return (
+                        <nav className="toc my-8 w-full bg-card overflow-hidden border border-border/50 shadow-sm">
+                            <div className="border-b border-border/50 bg-muted/30 px-6 py-4">
+                                <span className="block m-0 text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground">
+                                    Table of Contents
+                                </span>
+                            </div>
+                            <div className="px-6 py-4 prose-ol:m-0 prose-ol:p-0 prose-li:m-0 prose-li:list-none prose-li:border-t prose-li:border-border/30 first:prose-li:border-t-0 hover:prose-a:text-primary overflow-x-hidden">
+                                {domToReact(domNode.children as DOMNode[], options)}
+                            </div>
+                            {/* We inject scoped CSS specifically to remove native prose styling inside the TOC list items and explicitly style the TOC anchors */}
+                            <style dangerouslySetInnerHTML={{
+                                __html: `
+                                    .toc ol { margin: 0; padding: 0; list-style-type: none; }
+                                    .toc li { margin: 0; border-top: 1px solid hsl(var(--border) / 0.3); }
+                                    .toc li:first-child { border-top: none; }
+                                    .toc a { 
+                                        display: flex; 
+                                        align-items: flex-start;
+                                        padding: 0.75rem 0; 
+                                        font-size: 0.9375rem; 
+                                        font-weight: 500; 
+                                        color: hsl(var(--muted-foreground)); 
+                                        text-decoration: none; 
+                                        transition: color 0.2s ease, transform 0.2s ease;
+                                        line-height: 1.5;
+                                    }
+                                    .toc a::before {
+                                        content: "•";
+                                        font-size: 1.25em;
+                                        line-height: 1;
+                                        margin-right: 0.6rem;
+                                        margin-top: 0.1rem;
+                                        opacity: 0.5;
+                                        transition: opacity 0.2s ease, transform 0.2s ease;
+                                    }
+                                    .toc a:hover { 
+                                        color: hsl(var(--foreground));
+                                    }
+                                    .toc a:hover::before {
+                                        opacity: 1;
+                                        transform: translateX(3px);
+                                        color: hsl(var(--primary));
+                                    }
+                                    .toc p { display: none !important; } /* Hide the duplicate CMS title ('In This Guide') */
+                                    /* Handle dead links / spans inside TOC to look similar but disabled */
+                                    .toc span {
+                                        display: flex;
+                                        align-items: flex-start;
+                                        padding: 0.75rem 0;
+                                        font-size: 0.9375rem;
+                                        color: hsl(var(--muted-foreground) / 0.5);
+                                    }
+                                    .toc span::before {
+                                        content: "•";
+                                        font-size: 1.25em;
+                                        line-height: 1;
+                                        margin-right: 0.6rem;
+                                        margin-top: 0.1rem;
+                                        opacity: 0.2;
+                                    }
+                                `
+                            }} />
+                        </nav>
+                    );
+                }
+
                 // --- Remove bunched spoke-link paragraphs (duplicates) ---
                 if (domNode.tagName === "p" && domNode.attribs?.class?.includes("spoke-link")) {
                     return <></>;
@@ -186,6 +255,7 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, 
                     }
 
                     // 2. Kill broken href="#" links — render as plain text to prevent scroll-to-top
+                    // (But allow real anchor links like href="#some-section")
                     if (href === "#" || href === "") {
                         return <span>{domToReact(domNode.children as DOMNode[], options)}</span>;
                     }
@@ -229,7 +299,7 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, 
                         // Inject tools immediately following the matched H2
                         return (
                             <React.Fragment key={`h2-${h2Counter}`}>
-                                <h2>{domToReact(domNode.children as DOMNode[], options)}</h2>
+                                <h2 id={domNode.attribs?.id}>{domToReact(domNode.children as DOMNode[], options)}</h2>
                                 {matchedTools.map((t, idx) => (
                                     <ToolInjector key={`tool-${h2Counter}-${idx}`} tool={t} />
                                 ))}

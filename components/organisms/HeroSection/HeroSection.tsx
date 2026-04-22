@@ -45,18 +45,15 @@ export default function HeroSection({ mainArticles, className }: HeroSectionProp
 
                 {/* Hardcoded scoped CSS to guarantee Grid layout engine without global bleed */}
                 <style dangerouslySetInnerHTML={{__html: `
-                    .bento-wrapper { display: grid; gap: 0.5rem; grid-template-columns: repeat(2, 1fr); }
-                    .bento-wrapper > *:first-child { grid-column: 1 / -1; }
-                    .bento-wrapper > * { grid-column: var(--mobile-col); grid-row: var(--mobile-row); }
+                    .bento-wrapper { display: flex; flex-direction: column; gap: 0.5rem; }
                     @media (min-width: 640px) { .bento-wrapper { gap: 0.75rem; } }
                     @media (min-width: 1024px) {
-                        .bento-wrapper { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 130px; gap: 1.5rem; grid-auto-flow: row dense; }
-                        .bento-wrapper > *:first-child { grid-column: auto; }
+                        .bento-wrapper { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 130px; gap: 1.5rem; grid-auto-flow: row dense; }
                         .bento-wrapper > * { grid-column: var(--desktop-col) !important; grid-row: var(--desktop-row) !important; height: 100% !important; border-radius: 0 !important; }
                     }
                 `}} />
 
-                {/* The 4x5 Bento Grid */}
+                {/* The Bento Grid */}
                 <div className="bento-wrapper">
                     {bentoArticles.map((article, index) => {
                         const tileClass = BENTO_CLASSES[index] || "bento-tall";

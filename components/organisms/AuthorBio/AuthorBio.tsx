@@ -27,7 +27,7 @@ export default function AuthorBio({ author }: AuthorBioProps) {
     const hasAvatar = author.avatar && !author.avatar.includes("placeholder") && !isEditorial;
 
     return (
-        <div className="my-24 rounded-lg border border-border bg-card p-8 md:p-10">
+        <div className="rounded-lg border border-border bg-card p-8 md:p-10">
             <div className="flex flex-col sm:flex-row items-start gap-6">
                 <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border-2 border-border">
                     {hasAvatar ? (

@@ -53,18 +53,11 @@
    BENTO GRID
    ========================================================= */
 
-/* Mobile-first bento grid: 2 cols → 4-col on desktop */
+/* Mobile-first bento grid: single column alternating rhythm → 4-col on desktop */
 .bento-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: 0.5rem;
-}
-
-/* First card spans full width on mobile for emphasis */
-@media (max-width: 1023px) {
-    .bento-grid .bento-card:first-child {
-        grid-column: 1 / -1;
-    }
 }
 
 @media (min-width: 640px) {
@@ -95,29 +88,56 @@
     }
 }
 
-/* Bento card height: compact on mobile → auto on desktop */
+/* Bento card mobile: alternating tall/compact rhythm
+   Pattern: 1 vertical (240px) → 2 horizontal (100px) → repeat
+   Cards 0,3 = vertical (tall);  Cards 1,2,4,5 = horizontal (compact) */
 .bento-card {
-    height: 180px;
-    border-radius: 6px;
+    height: 100px;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-.bento-card:first-child {
-    height: 220px;
+/* Vertical (tall) cards: 1st and 4th */
+.bento-card:nth-child(1),
+.bento-card:nth-child(4) {
+    height: 240px;
+}
+
+/* Compact (horizontal) cards: 2nd, 3rd, 5th, 6th */
+.bento-card:nth-child(2),
+.bento-card:nth-child(3),
+.bento-card:nth-child(5),
+.bento-card:nth-child(6) {
+    height: 100px;
 }
 
 @media (min-width: 640px) {
     .bento-card {
-        height: 220px;
+        height: 120px;
+        border-radius: 6px;
     }
 
-    .bento-card:first-child {
+    .bento-card:nth-child(1),
+    .bento-card:nth-child(4) {
         height: 280px;
+    }
+
+    .bento-card:nth-child(2),
+    .bento-card:nth-child(3),
+    .bento-card:nth-child(5),
+    .bento-card:nth-child(6) {
+        height: 120px;
     }
 }
 
 @media (min-width: 1024px) {
     .bento-card,
-    .bento-card:first-child {
+    .bento-card:nth-child(1),
+    .bento-card:nth-child(2),
+    .bento-card:nth-child(3),
+    .bento-card:nth-child(4),
+    .bento-card:nth-child(5),
+    .bento-card:nth-child(6) {
         height: 100%;
         border-radius: 0;
     }

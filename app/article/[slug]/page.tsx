@@ -18,6 +18,7 @@ import PushNotificationBannerClient from "@/components/molecules/PushNotificatio
 import ArticleSchema from "@/components/seo/ArticleSchema";
 import FAQSchema from "@/components/seo/FAQSchema";
 import RelatedLinkBanner from "@/components/molecules/RelatedLinkBanner/RelatedLinkBanner";
+import ArticleDrawerTrigger from "@/components/organisms/ToolDrawer/ArticleDrawerTrigger";
 
 export const revalidate = 3600;
 
@@ -93,7 +94,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
             {article.faqSection && <FAQSchema faqs={article.faqSection} />}
 
-            <Container className="py-16 lg:py-32">
+            <Container className="pt-16 pb-0 lg:pt-32 lg:pb-0">
                 <div className="mx-auto max-w-5xl">
                     {/* Breadcrumb — show category path */}
                     <Breadcrumb
@@ -140,11 +141,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                                 validSlugs={Array.from(validSlugs)}
                             />
 
-                            <div className="mt-10">
+                            <div className="mt-10 sm:mt-10">
                                 <NextStepsSection relatedTool={article.relatedTool} />
                             </div>
-
-                            <div className="mt-10 border-t border-border pt-8">
+                            <div className="mt-16 sm:mt-16 mb-16 sm:mb-16">
                                 <AuthorBio author={article.author} />
                             </div>
                         </div>
@@ -160,7 +160,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 </div>
             </Container>
 
-            <section className="border-t border-border bg-muted/30 py-12 sm:py-16">
+            <section className="border-t border-border py-16">
                 <Container>
                     <RelatedArticles articles={relatedArticles} />
                 </Container>
@@ -176,6 +176,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
             {/* Web Push Notification — lazy loaded, appears at 85% scroll */}
             <PushNotificationBannerClient />
+            
+            {/* Tool Discovery Drawer Trigger (waits 5s) */}
+            <ArticleDrawerTrigger />
         </article>
     );
 }
