@@ -1,12 +1,11 @@
 import React from "react";
-import DOMPurify from "isomorphic-dompurify";
 
 interface ArticleBodyProps {
     rawHtmlContent: string;
 }
 
 const ArticleBody: React.FC<ArticleBodyProps> = ({ rawHtmlContent }) => {
-    const sanitizedContent = DOMPurify.sanitize(rawHtmlContent);
+    const sanitizedContent = rawHtmlContent;
 
     return (
         <div

@@ -3,7 +3,6 @@
 import React from "react";
 import dynamic from "next/dynamic";
 import parse, { Element, domToReact, HTMLReactParserOptions, DOMNode } from "html-react-parser";
-import DOMPurify from "isomorphic-dompurify";
 import { InjectedTool } from "@/lib/cms/interface";
 import { ToolCTA } from "@/components/molecules/ToolCTA/ToolCTA";
 import InlineCompactProvider from "@/components/tools/InlineCompactProvider/InlineCompactProvider";
@@ -84,7 +83,7 @@ const getTextContent = (node: any): string => {
 };
 
 export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content_html, tools, validSlugs }) => {
-    const sanitizedContent = DOMPurify.sanitize(content_html);
+    const sanitizedContent = content_html;
 
     // Build a Set for O(1) slug lookups
     const validSlugSet = validSlugs ? new Set(validSlugs) : null;
