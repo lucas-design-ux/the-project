@@ -106,6 +106,12 @@ async function strapiFetch<T>(
         );
     }
 
+    console.log('[strapiFetch] Headers:', {
+        hasCFId: !!process.env.CF_ACCESS_CLIENT_ID,
+        hasCFSecret: !!process.env.CF_ACCESS_CLIENT_SECRET,
+        url: url.toString().substring(0, 100)
+    });
+
     const res = await fetch(url.toString(), {
         headers: {
             Authorization: `Bearer ${STRAPI_TOKEN}`,
