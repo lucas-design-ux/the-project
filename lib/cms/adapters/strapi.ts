@@ -116,7 +116,7 @@ async function strapiFetch<T>(
             ...(process.env.CF_ACCESS_CLIENT_ID && { "CF-Access-Client-Id": process.env.CF_ACCESS_CLIENT_ID }),
             ...(process.env.CF_ACCESS_CLIENT_SECRET && { "CF-Access-Client-Secret": process.env.CF_ACCESS_CLIENT_SECRET }),
         },
-        signal: AbortSignal.timeout(10_000), // 10s — fail fast instead of hanging the build
+        signal: AbortSignal.timeout(60_000), // 60s timeout to allow concurrent sitemap generation during build
         cache: process.env.NODE_ENV === "development" ? "no-store" : undefined,
         next: process.env.NODE_ENV === "development" ? undefined : { revalidate: 3600 },
     });
