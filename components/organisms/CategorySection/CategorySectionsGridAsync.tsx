@@ -16,7 +16,13 @@ const COLS = 3;
 
 export default async function CategorySectionsGridAsync() {
     const slugs = CATEGORY_CONFIGS.map(c => c.slug);
-    const articlesMap = await cms.getArticlesByCategorySlugs(slugs, 6);
+    let articlesMap: Record<string, import("@/lib/cms/interface").Article[]>;
+    try {
+        articlesMap = await cms.getArticlesByCategorySlugs(slugs, 6);
+    } catch (error) {
+        console.error("[CategorySectionsGridAsync] Failed to fetch category articles:", error);
+        return null;
+    }
 
     // Filter out categories with no articles
     const validConfigs = CATEGORY_CONFIGS.filter(c => {

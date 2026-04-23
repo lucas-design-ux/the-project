@@ -2,7 +2,13 @@ import { cms } from "@/lib/cms";
 import HeroSection from "@/components/organisms/HeroSection/HeroSection";
 
 export default async function HeroSectionAsync() {
-    const heroArticles = await cms.getHeroArticles(10);
+    let heroArticles;
+    try {
+        heroArticles = await cms.getHeroArticles(10);
+    } catch (error) {
+        console.error("[HeroSectionAsync] Failed to fetch hero articles:", error);
+        return null;
+    }
 
     if (!heroArticles || heroArticles.length === 0) {
         return null;

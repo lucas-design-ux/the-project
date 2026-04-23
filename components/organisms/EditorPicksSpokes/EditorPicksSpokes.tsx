@@ -10,11 +10,17 @@ export default async function EditorPicksSpokes({
     parentPillarSlug,
     currentArticleSlug,
 }: EditorPicksSpokesProps) {
-    const siblingSpokes = await cms.getSiblingSpokes(
-        parentPillarSlug,
-        currentArticleSlug,
-        4
-    );
+    let siblingSpokes;
+    try {
+        siblingSpokes = await cms.getSiblingSpokes(
+            parentPillarSlug,
+            currentArticleSlug,
+            4
+        );
+    } catch (error) {
+        console.error("[EditorPicksSpokes] Failed to fetch sibling spokes:", error);
+        return null;
+    }
 
     if (!siblingSpokes || siblingSpokes.length === 0) return null;
 

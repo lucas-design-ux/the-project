@@ -4,7 +4,14 @@ import ToolSuggestionBanner from "@/components/molecules/ToolSuggestionBanner/To
 import Link from "next/link";
 
 export default async function SideHustlesSectionAsync() {
-    const { articles } = await cms.getArticlesByCategory('side-hustles-and-fintech', { page: 1, limit: 4 });
+    let articles;
+    try {
+        const result = await cms.getArticlesByCategory('side-hustles-and-fintech', { page: 1, limit: 4 });
+        articles = result.articles;
+    } catch (error) {
+        console.error("[SideHustlesSectionAsync] Failed to fetch side hustles:", error);
+        return null;
+    }
 
     if (!articles || articles.length === 0) return null;
 
