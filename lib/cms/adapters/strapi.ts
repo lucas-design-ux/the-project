@@ -27,6 +27,13 @@ if (!STRAPI_TOKEN) {
     );
 }
 
+if (!process.env.CF_BYPASS_TOKEN && !process.env.CF_ACCESS_CLIENT_ID) {
+    console.warn(
+        "[StrapiCMS] Neither CF_BYPASS_TOKEN nor CF_ACCESS_CLIENT_ID is set. " +
+        "If Strapi is behind Cloudflare (e.g., Bot Fight Mode or WAF), Vercel requests will time out or return 403/500."
+    );
+}
+
 // ---------------------------------------------------------------------------
 // Default author used when the pipeline does not provide one
 // ---------------------------------------------------------------------------
@@ -103,11 +110,11 @@ async function strapiFetch<T>(
         headers: {
             Authorization: `Bearer ${STRAPI_TOKEN}`,
             "Content-Type": "application/json",
+            // Cloudflare WAF bypass — MUST be present on every request
+            "x-vercel-bypass": process.env.CF_BYPASS_TOKEN ?? "",
             // Optional: Cloudflare Zero Trust access headers
             ...(process.env.CF_ACCESS_CLIENT_ID && { "CF-Access-Client-Id": process.env.CF_ACCESS_CLIENT_ID }),
             ...(process.env.CF_ACCESS_CLIENT_SECRET && { "CF-Access-Client-Secret": process.env.CF_ACCESS_CLIENT_SECRET }),
-            // Optional: Custom header for WAF bypass rule
-            ...(process.env.CF_BYPASS_TOKEN && { "x-vercel-bypass": process.env.CF_BYPASS_TOKEN }),
         },
         signal: AbortSignal.timeout(10_000), // 10s — fail fast instead of hanging the build
         cache: process.env.NODE_ENV === "development" ? "no-store" : undefined,
