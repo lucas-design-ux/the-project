@@ -47,12 +47,14 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
     }
 
     return {
-        title: `${article.title} | Wealth Logik`,
+        title: article.title,
         description: article.metaDescription ?? article.excerpt,
         openGraph: {
             title: article.title,
             description: article.metaDescription ?? article.excerpt,
-            images: [article.coverImage],
+            images: article.coverImage
+                ? [{ url: article.coverImage, width: 1200, height: 630, alt: article.title }]
+                : [],
         },
     };
 }
