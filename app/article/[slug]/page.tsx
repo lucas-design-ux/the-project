@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { cms } from "@/lib/cms";
+import { Article } from "@/lib/cms/interface";
 import ArticleHeader from "@/components/organisms/ArticleHeader/ArticleHeader";
 import ArticleHeaderSkeleton from "@/components/organisms/ArticleHeader/ArticleHeaderSkeleton";
 import { ArticleRenderer } from "@/components/organisms/ArticleRenderer/ArticleRenderer";
@@ -30,7 +31,14 @@ interface ArticlePageProps {
 
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
     const { slug } = await params;
-    const article = await cms.getArticleBySlug(slug);
+
+    let article;
+    try {
+        article = await cms.getArticleBySlug(slug);
+    } catch (error) {
+        console.error(`[generateMetadata] Failed to fetch article "${slug}":`, error);
+        return { title: "Article Not Found" };
+    }
 
     if (!article) {
         return {
@@ -65,16 +73,29 @@ function rewriteInternalUrl(rawUrl: string): string {
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
     const { slug } = await params;
-    const article = await cms.getArticleBySlug(slug);
+
+    let article;
+    try {
+        article = await cms.getArticleBySlug(slug);
+    } catch (error) {
+        console.error(`[ArticlePage] Failed to fetch article "${slug}":`, error);
+        notFound();
+    }
 
     if (!article) {
         notFound();
     }
 
-    const [relatedArticles, validSlugs] = await Promise.all([
-        cms.getRelatedArticles(article.id),
-        cms.getAllSlugs(),
-    ]);
+    let relatedArticles: Article[] = [];
+    let validSlugs = new Set<string>();
+    try {
+        [relatedArticles, validSlugs] = await Promise.all([
+            cms.getRelatedArticles(article.id),
+            cms.getAllSlugs(),
+        ]);
+    } catch (error) {
+        console.error(`[ArticlePage] Failed to fetch related data for "${slug}":`, error);
+    }
 
     return (
         <article className="min-h-screen">
