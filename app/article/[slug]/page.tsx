@@ -191,10 +191,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
             {/* Editor's Picks: sibling spokes from the same pillar series */}
             {article.spokeMeta?.parent_pillar_slug && (
-                <EditorPicksSpokes
-                    parentPillarSlug={article.spokeMeta.parent_pillar_slug}
-                    currentArticleSlug={article.slug}
-                />
+                <Suspense fallback={null}>
+                    <EditorPicksSpokes
+                        parentPillarSlug={article.spokeMeta.parent_pillar_slug}
+                        currentArticleSlug={article.slug}
+                    />
+                </Suspense>
             )}
 
             {/* Web Push Notification — lazy loaded, appears at 85% scroll */}
