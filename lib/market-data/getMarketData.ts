@@ -63,11 +63,17 @@ export async function getMarketData(): Promise<TickerItem[]> {
         const [todayRes, previousRes] = await Promise.all([
             fetch(
                 `https://api.frankfurter.app/latest?from=USD&to=${currencyCodes}`,
-                { next: { revalidate: 21600 } }, // ISR: 6 hours
+                {
+                    signal: AbortSignal.timeout(8_000), // 8s — fail fast during build
+                    next: { revalidate: 21600 },
+                },
             ),
             fetch(
                 `https://api.frankfurter.app/${getPreviousBusinessDate(3)}?from=USD&to=${currencyCodes}`,
-                { next: { revalidate: 21600 } },
+                {
+                    signal: AbortSignal.timeout(8_000),
+                    next: { revalidate: 21600 },
+                },
             ),
         ]);
 

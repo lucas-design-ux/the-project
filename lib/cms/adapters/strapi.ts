@@ -109,6 +109,7 @@ async function strapiFetch<T>(
             // Optional: Custom header for WAF bypass rule
             ...(process.env.CF_BYPASS_TOKEN && { "x-vercel-bypass": process.env.CF_BYPASS_TOKEN }),
         },
+        signal: AbortSignal.timeout(10_000), // 10s — fail fast instead of hanging the build
         cache: process.env.NODE_ENV === "development" ? "no-store" : undefined,
         next: process.env.NODE_ENV === "development" ? undefined : { revalidate: 3600 },
     });

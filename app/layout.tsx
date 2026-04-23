@@ -6,7 +6,6 @@ import Header from "@/components/organisms/Header/Header";
 import Footer from "@/components/organisms/Footer/Footer";
 import { ThemeProvider } from "@/lib/theme/ThemeProvider";
 import MarketTicker from "@/components/organisms/MarketTicker/MarketTicker";
-import { getMarketData } from "@/lib/market-data/getMarketData";
 import OneSignalProviderClient from "@/components/atoms/OneSignalProvider/OneSignalProviderClient";
 
 const inter = Inter({
@@ -48,13 +47,11 @@ export const metadata: Metadata = {
   ],
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const marketData = await getMarketData();
-
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -104,7 +101,7 @@ export default async function RootLayout({
       </head>
       <body className={`${inter.variable} ${dmSerif.variable} antialiased font-sans min-h-screen flex flex-col overflow-x-hidden`}>
         <OneSignalProviderClient />
-        <MarketTicker data={marketData} />
+        <MarketTicker />
         <div className="max-w-screen-2xl mx-auto w-full bg-background">
           <ThemeProvider>
             <Header />
