@@ -56,25 +56,6 @@ const nextConfig: NextConfig = {
 
   async headers() {
     return [
-      // Override Next.js RSC Vary headers for sitemaps
-      {
-        source: '/sitemap-index.xml',
-        headers: [
-          {
-            key: 'Vary',
-            value: 'Accept-Encoding',
-          },
-        ],
-      },
-      {
-        source: '/sitemap/:path*',
-        headers: [
-          {
-            key: 'Vary',
-            value: 'Accept-Encoding',
-          },
-        ],
-      },
       // Cache static images aggressively
       {
         source: "/:all*(svg|jpg|jpeg|png|gif|webp|avif)",
