@@ -1,18 +1,16 @@
-import { MetadataRoute } from 'next';
 import { cms } from '@/lib/cms';
 import type { Article } from '@/lib/cms/interface';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://wealthlogik.com';
 
 /**
- * Hub-and-Spoke Sitemap Index Architecture
+ * Hub-and-Spoke Sitemap Architecture
  * ─────────────────────────────────────────
- * Generates a Sitemap Index with dedicated sub-sitemaps per topic hub.
- * Each sub-sitemap groups a category landing (hub), its pillar article,
- * and all spoke articles — communicating topical authority to Google.
+ * Generates sub-sitemaps per topic hub via Route Handlers for full
+ * control over response headers (Content-Type, Cache-Control, no Vary).
  *
  * Resulting structure:
- *   /sitemap.xml                         → Sitemap Index (auto-generated)
+ *   /sitemap-index.xml                   → Sitemap Index (route handler)
  *   /sitemap/0.xml                       → Static pages
  *   /sitemap/1.xml                       → Tools
  *   /sitemap/2.xml ... /sitemap/N.xml    → One per hub/category (sorted A-Z)
@@ -23,19 +21,23 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://wealthlogik.com';
  * │ Hub (Pillar)     │ null — article IS the topical authority           │   0.85   │
  * │ Spoke            │ { parent_pillar_slug, parent_pillar_title, ... } │   0.70   │
  * └──────────────────┴───────────────────────────────────────────────────┴──────────┘
- *
- * Scalability: new articles published via the Strapi pipeline are
- * automatically included in their hub's sub-sitemap on the next ISR
- * revalidation cycle. New categories create new sub-sitemaps automatically.
  */
-
-// Re-generate sitemaps every hour to pick up new pipeline-published articles
-export const revalidate = 3600;
 
 // ── Reserved sub-sitemap indices ────────────────────────────────────────
 const STATIC_INDEX = 0;
 const TOOLS_INDEX = 1;
 const CATEGORY_OFFSET = 2;
+
+// ── Types ───────────────────────────────────────────────────────────────
+
+interface SitemapEntry {
+    url: string;
+    lastModified?: Date;
+    changeFrequency?: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
+    priority?: number;
+}
+
+// ── Helpers ─────────────────────────────────────────────────────────────
 
 /**
  * Returns a stable, alphabetically-sorted list of all categories.
@@ -47,31 +49,57 @@ async function getSortedCategories() {
     return categories.sort((a, b) => a.slug.localeCompare(b.slug));
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// generateSitemaps — tells Next.js how many sub-sitemaps to create
-// ─────────────────────────────────────────────────────────────────────────
-
-export async function generateSitemaps() {
-    const categories = await getSortedCategories();
-
-    return [
-        { id: STATIC_INDEX },
-        { id: TOOLS_INDEX },
-        ...categories.map((_, i) => ({ id: i + CATEGORY_OFFSET })),
-    ];
+/**
+ * Escapes special XML characters in a string.
+ */
+function escapeXml(str: string): string {
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// sitemap — generates the content of each individual sub-sitemap
-// Next.js 16: id is passed as Promise<string> and must be awaited
-// ─────────────────────────────────────────────────────────────────────────
+// ── Public API ──────────────────────────────────────────────────────────
 
-export default async function sitemap(props: {
-    id: Promise<string>;
-}): Promise<MetadataRoute.Sitemap> {
-    const rawId = await props.id;
-    const id = Number(rawId);
+/**
+ * Returns the total number of sub-sitemaps.
+ */
+export async function getSitemapCount(): Promise<number> {
+    const categories = await getSortedCategories();
+    return CATEGORY_OFFSET + categories.length;
+}
 
+/**
+ * Generates the XML for a specific sub-sitemap by its numeric ID.
+ */
+export async function generateSubSitemapXml(id: number): Promise<string | null> {
+    const entries = await generateEntries(id);
+    if (entries === null) return null;
+    return entriesToXml(entries);
+}
+
+/**
+ * Generates the sitemap index XML listing all sub-sitemaps.
+ */
+export async function generateSitemapIndexXml(): Promise<string> {
+    const count = await getSitemapCount();
+    const locs = Array.from({ length: count }, (_, i) =>
+        `  <sitemap>\n    <loc>${escapeXml(`${SITE_URL}/sitemap/${i}.xml`)}</loc>\n  </sitemap>`
+    );
+
+    return [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+        ...locs,
+        '</sitemapindex>',
+    ].join('\n');
+}
+
+// ── Internals ───────────────────────────────────────────────────────────
+
+async function generateEntries(id: number): Promise<SitemapEntry[] | null> {
     // ── Sub-sitemap 0: Static pages ─────────────────────────────────────
     if (id === STATIC_INDEX) {
         return [
@@ -107,7 +135,7 @@ export default async function sitemap(props: {
     const category = categories[categoryIndex];
 
     if (!category) {
-        return []; // Safety fallback — should never happen
+        return null; // Invalid ID
     }
 
     // Fetch ALL articles in this category (paginated for Strapi limits)
@@ -126,7 +154,7 @@ export default async function sitemap(props: {
     }
 
     // 1) Category landing page (hub) — highest priority in this group
-    const entries: MetadataRoute.Sitemap = [
+    const entries: SitemapEntry[] = [
         {
             url: `${SITE_URL}/category/${category.slug}`,
             changeFrequency: 'weekly',
@@ -148,4 +176,27 @@ export default async function sitemap(props: {
     }
 
     return entries;
+}
+
+function entriesToXml(entries: SitemapEntry[]): string {
+    const urlBlocks = entries.map((entry) => {
+        const parts = [`    <loc>${escapeXml(entry.url)}</loc>`];
+        if (entry.lastModified) {
+            parts.push(`    <lastmod>${entry.lastModified.toISOString()}</lastmod>`);
+        }
+        if (entry.changeFrequency) {
+            parts.push(`    <changefreq>${entry.changeFrequency}</changefreq>`);
+        }
+        if (entry.priority !== undefined) {
+            parts.push(`    <priority>${entry.priority}</priority>`);
+        }
+        return `  <url>\n${parts.join('\n')}\n  </url>`;
+    });
+
+    return [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+        ...urlBlocks,
+        '</urlset>',
+    ].join('\n');
 }

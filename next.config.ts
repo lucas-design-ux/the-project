@@ -42,6 +42,18 @@ const nextConfig: NextConfig = {
     ...(isDev ? { dangerouslyAllowLocalIP: true } : {}),
   },
 
+  async redirects() {
+    return [
+      // Next.js 16 serves the sitemap index at /sitemap-index.xml.
+      // Redirect the conventional /sitemap.xml so GSC and crawlers find it.
+      {
+        source: '/sitemap.xml',
+        destination: '/sitemap-index.xml',
+        permanent: true,
+      },
+    ];
+  },
+
   async headers() {
     return [
       // Cache static images aggressively
